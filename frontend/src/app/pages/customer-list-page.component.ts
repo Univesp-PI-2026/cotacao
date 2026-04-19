@@ -60,7 +60,7 @@ import { CustomerService } from '../customer.service';
           <div class="card-actions">
             <a class="ghost link-button compact" [routerLink]="['/customers', customer.id]">✎ Editar</a>
             <a class="ghost link-button compact accent" [routerLink]="['/quotations/new']" [queryParams]="{ customerId: customer.id }">◉ Nova Cotação</a>
-            <button type="button" class="ghost compact danger" *ngIf="customer.active === 1" (click)="softDelete(customer.id)">■ Excluir</button>
+            <button type="button" class="ghost compact danger" *ngIf="customer.active === 1" (click)="softDelete(customer.id)">■ Desativar</button>
             <button type="button" class="ghost compact accent" *ngIf="customer.active === 0" (click)="activate(customer.id)">↺ Ativar</button>
           </div>
         </article>

@@ -10,6 +10,13 @@ async function listRoles() {
   return roleRepository.findAll();
 }
 
+async function listRolesByQuery(query = {}) {
+  const active =
+    query.active === "0" || query.active === "1" ? Number(query.active) : undefined;
+
+  return roleRepository.findAll({ active });
+}
+
 async function getRoleById(id) {
   const role = await roleRepository.findById(id);
 
@@ -32,11 +39,19 @@ async function updateRole(id, data) {
     throw createError("roles.not_found", 404);
   }
 
+  if (existingRole.active === 1 && data.active === 0) {
+    const usersCount = await roleRepository.countUsersByRoleId(id);
+
+    if (usersCount > 0) {
+      throw createError("roles.in_use", 400);
+    }
+  }
+
   await roleRepository.update(id, data);
   return roleRepository.findById(id);
 }
 
-async function deleteRole(id) {
+async function deactivateRole(id) {
   const existingRole = await roleRepository.findById(id);
 
   if (!existingRole) {
@@ -49,13 +64,27 @@ async function deleteRole(id) {
     throw createError("roles.in_use", 400);
   }
 
-  await roleRepository.remove(id);
+  const affectedRows = await roleRepository.updateActiveStatus(id, 0);
+
+  if (affectedRows === 0) {
+    throw createError("roles.not_found", 404);
+  }
+}
+
+async function activateRole(id) {
+  const affectedRows = await roleRepository.updateActiveStatus(id, 1);
+
+  if (affectedRows === 0) {
+    throw createError("roles.not_found", 404);
+  }
 }
 
 module.exports = {
+  activateRole,
   createRole,
-  deleteRole,
+  deactivateRole,
   getRoleById,
   listRoles,
+  listRolesByQuery,
   updateRole
 };

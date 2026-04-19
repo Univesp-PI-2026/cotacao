@@ -35,7 +35,7 @@ export class LoginPageComponent {
   protected login(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.errorMessage = 'Preencha usuário e senha.';
+      this.errorMessage = 'Informe usuário ou e-mail e senha.';
       return;
     }
 
@@ -53,7 +53,7 @@ export class LoginPageComponent {
       },
       error: (error) => {
         this.submitting = false;
-        this.errorMessage = error?.error?.message || 'Não foi possível entrar.';
+        this.errorMessage = error?.error?.message || 'Não foi possível entrar. Tente novamente.';
       }
     });
   }

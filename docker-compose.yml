@@ -81,7 +81,7 @@ services:
     networks:
       - cotacao-network
 
-  phpmyadmin:
+  myadmin:
     image: phpmyadmin/phpmyadmin
     container_name: ${CONTAINER_PREFIX:-cotacao-v02}-${APP_ENV:-dev}-phpmyadmin
     restart: unless-stopped

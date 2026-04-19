@@ -3,11 +3,11 @@ require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
 const pool = require("./db");
+const authRoutes = require("./modules/auth/auth.routes");
 const customerRoutes = require("./modules/customers/customers.routes");
 const quotationRoutes = require("./modules/quotations/quotations.routes");
 const roleRoutes = require("./modules/roles/roles.routes");
 const userRoutes = require("./modules/users/users.routes");
-const authRoutes = require("./routes/auth");
 const { requireAuth } = require("./middlewares/auth");
 
 const app = express();

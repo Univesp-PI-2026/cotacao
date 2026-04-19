@@ -5,12 +5,15 @@ module.exports = {
     internal_server_error: "Erro interno do servidor"
   },
   auth: {
-    token_missing: "Token nao informado",
-    token_invalid: "Token invalido ou expirado",
-    login_required_fields: "identifier e password sao obrigatorios",
-    invalid_credentials: "Credenciais invalidas",
-    inactive_user: "Usuario inativo",
-    login_failed: "Falha ao autenticar"
+    token_missing: "Token não informado",
+    token_invalid: "Token inválido ou expirado",
+    invalid_credentials: "Usuário, e-mail ou senha inválidos",
+    inactive_user: "Seu usuário está inativo",
+    login_failed: "Não foi possível autenticar",
+    validation: {
+      identifier_required: "Informe o usuário ou e-mail",
+      password_required: "Informe a senha"
+    }
   },
   customers: {
     not_found: "Cliente nao encontrado",
@@ -69,10 +72,12 @@ module.exports = {
     fetch_failed: "Falha ao buscar role",
     create_failed: "Falha ao criar role",
     update_failed: "Falha ao atualizar role",
-    delete_failed: "Falha ao remover role",
-    deleted_success: "Role removida com sucesso",
+    activate_failed: "Falha ao ativar role",
+    deactivate_failed: "Falha ao desativar role",
+    activated_success: "Role ativada com sucesso",
+    deactivated_success: "Role desativada com sucesso",
     duplicate_name: "Ja existe uma role com esse nome",
-    in_use: "Role esta sendo usada por usuarios",
+    in_use: "Nao e possivel desativar esta role porque ela esta vinculada a usuarios",
     validation: {
       name_required: "Nome da role e obrigatorio"
     }

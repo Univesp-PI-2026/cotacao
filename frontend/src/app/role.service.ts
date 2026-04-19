@@ -9,8 +9,9 @@ export class RoleService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = '/api/v1/roles';
 
-  list() {
-    return this.http.get<Role[]>(this.apiUrl);
+  list(filter: 'active' | 'inactive' | 'all' = 'all') {
+    const query = filter === 'all' ? '' : `?active=${filter === 'active' ? 1 : 0}`;
+    return this.http.get<Role[]>(`${this.apiUrl}${query}`);
   }
 
   getById(id: number) {
@@ -25,7 +26,11 @@ export class RoleService {
     return this.http.put<Role>(`${this.apiUrl}/${id}`, payload);
   }
 
-  delete(id: number) {
+  softDelete(id: number) {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
+  }
+
+  activate(id: number) {
+    return this.http.patch<{ message: string }>(`${this.apiUrl}/${id}/activate`, {});
   }
 }

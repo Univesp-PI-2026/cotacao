@@ -32,7 +32,7 @@ import { AuthService } from './auth.service';
               <span aria-hidden="true">📄</span>
               Cotações
             </a>
-            <a routerLink="/users" routerLinkActive="active">
+            <a *ngIf="isAdmin()" routerLink="/users" routerLinkActive="active">
               <span aria-hidden="true">👤</span>
               Usuários
             </a>
@@ -301,6 +301,10 @@ export class AppComponent {
 
   protected toggleFontSize(): void {
     this.largeText = !this.largeText;
+  }
+
+  protected isAdmin(): boolean {
+    return this.authService.currentUser()?.role_name === 'admin';
   }
 
   protected getInitial(name: string): string {
