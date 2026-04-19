@@ -1,0 +1,8 @@
+<svg width="160" height="44" viewBox="0 0 160 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="160" height="44" rx="10" fill="white" fill-opacity="0"/>
+  <path d="M22 6L31.5 10.5V21C31.5 28 27.1 33.8 22 36C16.9 33.8 12.5 28 12.5 21V10.5L22 6Z" fill="#4A57C8"/>
+  <path d="M22 10.5L27 12.9V20.5C27 24.9 24.6 28.7 22 30C19.4 28.7 17 24.9 17 20.5V12.9L22 10.5Z" fill="white"/>
+  <path d="M22 13L24.6 14.3V18H28V20.6H24.6V24.3L22 25.6L19.4 24.3V20.6H16V18H19.4V14.3L22 13Z" fill="#4A57C8"/>
+  <text x="40" y="18" fill="#A1A6BC" font-family="Arial, sans-serif" font-size="8" font-weight="700">Acesso ao Sistema</text>
+  <text x="40" y="31" fill="#3D49B5" font-family="Arial, sans-serif" font-size="18" font-weight="700">Grupo05</text>
+</svg>

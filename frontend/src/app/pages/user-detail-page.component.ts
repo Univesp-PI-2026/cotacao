@@ -23,6 +23,7 @@ import { UserService } from '../user.service';
         <div class="summary" *ngIf="loadedUser">
           <div><span class="label">Status</span><strong>{{ loadedUser.active === 1 ? 'Ativo' : 'Inativo' }}</strong></div>
           <div><span class="label">Role</span><strong>{{ loadedUser.role_name || 'Sem role' }}</strong></div>
+          <div><span class="label">Usuario</span><strong>{{ loadedUser.username }}</strong></div>
           <div><span class="label">E-mail</span><strong>{{ loadedUser.email }}</strong></div>
         </div>
 
@@ -42,6 +43,12 @@ import { UserService } from '../user.service';
             <span>Nome</span>
             <input formControlName="name" type="text" />
             <small class="field-error" *ngIf="showFieldError('name')">{{ getFieldError('name') }}</small>
+          </label>
+
+          <label>
+            <span>Usuario</span>
+            <input formControlName="username" type="text" autocomplete="username" />
+            <small class="field-error" *ngIf="showFieldError('username')">{{ getFieldError('username') }}</small>
           </label>
 
           <label>
@@ -121,6 +128,7 @@ export class UserDetailPageComponent {
   protected readonly form = this.fb.nonNullable.group({
     role_id: [0, [Validators.required, Validators.min(1)]],
     name: ['', [Validators.required]],
+    username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(30), Validators.pattern(/^[a-zA-Z0-9._-]+$/)]],
     email: ['', [Validators.required, Validators.email]],
     password: [''],
     active: [true]
@@ -171,6 +179,7 @@ export class UserDetailPageComponent {
         this.form.patchValue({
           role_id: user.role_id ?? 0,
           name: user.name,
+          username: user.username,
           email: user.email,
           password: '',
           active: user.active === 1
@@ -263,6 +272,7 @@ export class UserDetailPageComponent {
     this.form.reset({
       role_id: 0,
       name: '',
+      username: '',
       email: '',
       password: '',
       active: true
@@ -287,11 +297,19 @@ export class UserDetailPageComponent {
     if (field.hasError('email')) {
       return 'Informe um e-mail valido.';
     }
+    if (field.hasError('pattern')) {
+      return 'Use apenas letras, numeros, ponto, traco ou underscore.';
+    }
     if (field.hasError('min')) {
       return 'Selecione uma role valida.';
     }
     if (field.hasError('minlength')) {
-      return 'A senha deve ter pelo menos 8 caracteres.';
+      return fieldName === 'password'
+        ? 'A senha deve ter pelo menos 8 caracteres.'
+        : 'O usuario deve ter pelo menos 3 caracteres.';
+    }
+    if (field.hasError('maxlength')) {
+      return 'O usuario deve ter no maximo 30 caracteres.';
     }
 
     return 'Campo invalido.';
@@ -303,7 +321,10 @@ export class UserDetailPageComponent {
     errors.forEach((errorMessage) => {
       const normalizedError = errorMessage.toLowerCase();
 
-      if (normalizedError.includes('name')) {
+      if (normalizedError.includes('usuario') || normalizedError.includes('username')) {
+        this.serverFieldErrors.username = this.translateApiError(errorMessage);
+        this.form.controls.username.markAsTouched();
+      } else if (normalizedError.includes('name')) {
         this.serverFieldErrors.name = this.translateApiError(errorMessage);
         this.form.controls.name.markAsTouched();
       } else if (normalizedError.includes('email')) {
@@ -322,11 +343,17 @@ export class UserDetailPageComponent {
   private translateApiError(errorMessage: string): string {
     const normalizedError = errorMessage.toLowerCase();
 
-    if (normalizedError === 'email already exists') {
-      return 'Ja existe um usuário com esse e-mail.';
+    if (
+      normalizedError.includes('username or email already exists') ||
+      normalizedError.includes('usuario ou email')
+    ) {
+      return 'Ja existe um usuario com esse usuario ou e-mail.';
     }
     if (normalizedError === 'role_id is invalid') {
       return 'Selecione uma role valida.';
+    }
+    if (normalizedError.includes('username must be') || normalizedError.includes('usuario deve')) {
+      return 'Informe um usuario valido.';
     }
     if (normalizedError.includes('must be valid')) {
       return 'Informe um valor valido.';

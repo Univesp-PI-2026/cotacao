@@ -1,3 +1,5 @@
+const { t } = require("../../utils/i18n");
+
 function normalizeBoolean(value) {
   if (typeof value === "boolean") {
     return value;
@@ -34,7 +36,7 @@ function normalizeCoverages(value) {
   return [];
 }
 
-function validateQuotationPayload(payload) {
+function validateQuotationPayload(payload, locale) {
   const errors = [];
   const customerId = normalizeInteger(payload.customer_id);
   const insuranceType = normalizeInteger(payload.insurance_type);
@@ -44,68 +46,73 @@ function validateQuotationPayload(payload) {
   const driverAge = normalizeInteger(payload.driver_age);
 
   if (customerId === null) {
-    errors.push("customer_id is required");
+    errors.push(t("quotations.validation.customer_required", locale));
   }
 
   if (!payload.request_date) {
-    errors.push("request_date is required");
+    errors.push(t("quotations.validation.request_date_required", locale));
   }
 
   if (insuranceType !== 0 && insuranceType !== 1) {
-    errors.push("insurance_type must be 0 or 1");
+    errors.push(t("quotations.validation.insurance_type_invalid", locale));
   }
 
   if (insuranceType === 1 && (!payload.bonus_class || String(payload.bonus_class).trim() === "")) {
-    errors.push("bonus_class is required for renewal");
+    errors.push(t("quotations.validation.bonus_class_required", locale));
   }
 
   if (insuranceType === 1 && hasClaims === null) {
-    errors.push("has_claims is required for renewal");
+    errors.push(t("quotations.validation.has_claims_required", locale));
   }
 
   if (!payload.vehicle_plate || String(payload.vehicle_plate).trim() === "") {
-    errors.push("vehicle_plate is required");
+    errors.push(t("quotations.validation.vehicle_plate_required", locale));
   }
 
   if (!payload.vehicle_chassis || String(payload.vehicle_chassis).trim() === "") {
-    errors.push("vehicle_chassis is required");
+    errors.push(t("quotations.validation.vehicle_chassis_required", locale));
   }
 
   if (!payload.vehicle_brand || String(payload.vehicle_brand).trim() === "") {
-    errors.push("vehicle_brand is required");
+    errors.push(t("quotations.validation.vehicle_brand_required", locale));
   }
 
   if (!payload.vehicle_model || String(payload.vehicle_model).trim() === "") {
-    errors.push("vehicle_model is required");
+    errors.push(t("quotations.validation.vehicle_model_required", locale));
   }
 
   if (manufactureYear === null) {
-    errors.push("manufacture_year is required");
+    errors.push(t("quotations.validation.manufacture_year_required", locale));
   }
 
   if (!payload.overnight_zipcode || String(payload.overnight_zipcode).trim() === "") {
-    errors.push("overnight_zipcode is required");
+    errors.push(t("quotations.validation.overnight_zipcode_required", locale));
   }
 
   if (driverAge === null) {
-    errors.push("driver_age is required");
+    errors.push(t("quotations.validation.driver_age_required", locale));
   }
 
   if (!payload.license_time || String(payload.license_time).trim() === "") {
-    errors.push("license_time is required");
+    errors.push(t("quotations.validation.license_time_required", locale));
   }
 
   if (hasInsurerPreference === null) {
-    errors.push("has_insurer_preference must be boolean");
+    errors.push(t("quotations.validation.insurer_preference_invalid", locale));
   }
 
-  if (hasInsurerPreference === true && (!payload.preferred_insurer || String(payload.preferred_insurer).trim() === "")) {
-    errors.push("preferred_insurer is required when has_insurer_preference is true");
+  if (
+    hasInsurerPreference === true &&
+    (!payload.preferred_insurer || String(payload.preferred_insurer).trim() === "")
+  ) {
+    errors.push(t("quotations.validation.preferred_insurer_required", locale));
   }
 
   if (errors.length > 0) {
     return { errors };
   }
+
+  const normalizedActive = normalizeBoolean(payload.active);
 
   return {
     data: {
@@ -125,7 +132,7 @@ function validateQuotationPayload(payload) {
       coverages: normalizeCoverages(payload.coverages),
       has_insurer_preference: hasInsurerPreference ? 1 : 0,
       preferred_insurer: hasInsurerPreference ? String(payload.preferred_insurer).trim() : null,
-      active: normalizeBoolean(payload.active) === null ? 1 : normalizeBoolean(payload.active) ? 1 : 0
+      active: normalizedActive === null ? 1 : normalizedActive ? 1 : 0
     }
   };
 }

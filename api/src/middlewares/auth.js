@@ -1,10 +1,12 @@
 const jwt = require("jsonwebtoken");
+const { getRequestLocale, t } = require("../utils/i18n");
 
 function requireAuth(req, res, next) {
   const authHeader = req.headers.authorization || "";
+  const locale = getRequestLocale(req);
 
   if (!authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Token nao informado" });
+    return res.status(401).json({ message: t("auth.token_missing", locale) });
   }
 
   const token = authHeader.slice("Bearer ".length).trim();
@@ -14,7 +16,7 @@ function requireAuth(req, res, next) {
     req.auth = payload;
     return next();
   } catch (_error) {
-    return res.status(401).json({ message: "Token invalido ou expirado" });
+    return res.status(401).json({ message: t("auth.token_invalid", locale) });
   }
 }
 

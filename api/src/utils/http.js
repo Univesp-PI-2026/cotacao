@@ -1,17 +1,19 @@
-function badRequest(res, errors) {
+const { t } = require("./i18n");
+
+function badRequest(res, errors, locale, messageKey = "common.invalid_data") {
   return res.status(400).json({
-    message: "Dados invalidos",
+    message: t(messageKey, locale),
     errors
   });
 }
 
-function notFound(res, message = "Registro nao encontrado") {
-  return res.status(404).json({ message });
+function notFound(res, messageOrKey = "common.not_found", locale) {
+  return res.status(404).json({ message: t(messageOrKey, locale) });
 }
 
-function serverError(res, error, message = "Erro interno do servidor") {
+function serverError(res, error, messageOrKey = "common.internal_server_error", locale) {
   return res.status(500).json({
-    message,
+    message: t(messageOrKey, locale),
     detail: error.message
   });
 }

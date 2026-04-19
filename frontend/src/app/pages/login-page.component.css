@@ -1,0 +1,208 @@
+.login-shell {
+  min-height: 100vh;
+  width: 100vw;
+  margin: -20px calc(50% - 50vw) 0;
+  padding: 20px 14px;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 25% 20%, rgba(126, 145, 255, 0.28), transparent 26%),
+    radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.08), transparent 18%),
+    linear-gradient(135deg, #4b57c5 0%, #2d35a8 55%, #242b95 100%);
+}
+
+.login-card {
+  width: min(100%, 350px);
+  background: #ffffff;
+  border: 1px solid rgba(33, 41, 120, 0.12);
+  border-radius: 10px;
+  padding: 18px 12px 12px;
+  box-shadow: 0 22px 52px rgba(15, 22, 91, 0.32);
+}
+
+.brand-block {
+  display: grid;
+  justify-items: center;
+  margin-bottom: 14px;
+}
+
+.brand-logo {
+  width: 128px;
+  height: auto;
+  max-width: 100%;
+  display: block;
+}
+
+.form {
+  display: grid;
+  gap: 7px;
+}
+
+.field {
+  min-height: 31px;
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  border: 1px solid #d2d5e6;
+  border-radius: 2px;
+  background: #fff;
+}
+
+.field-icon {
+  width: 14px;
+  height: 14px;
+  color: #101010;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.field-icon svg,
+.password-toggle svg,
+.button-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.field-icon .icon-cut {
+  stroke-width: 1.6;
+}
+
+input {
+  width: 100%;
+  border: 0;
+  outline: none;
+  padding: 7px 0;
+  font: inherit;
+  color: #2f3566;
+  font-size: 0.8rem;
+  background: transparent;
+}
+
+input::placeholder {
+  color: #8187a4;
+}
+
+.password-field {
+  padding-right: 6px;
+}
+
+.password-input-wrap {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 4px;
+}
+
+.password-toggle {
+  border: 0;
+  background: transparent;
+  color: #101010;
+  cursor: pointer;
+  padding: 0;
+  width: 15px;
+  height: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.helper-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 14px;
+  margin-top: 1px;
+}
+
+.helper-link {
+  border: 0;
+  background: transparent;
+  color: #5b68d1;
+  font-size: 0.62rem;
+  padding: 0;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.field-error {
+  color: #c44646;
+  font-size: 0.68rem;
+  padding-left: 2px;
+}
+
+.primary {
+  border: 0;
+  border-radius: 2px;
+  min-height: 31px;
+  margin-top: 6px;
+  padding: 0 18px;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  background: linear-gradient(180deg, #4f5ccc 0%, #4450bc 100%);
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.button-icon {
+  width: 13px;
+  height: 13px;
+  display: inline-flex;
+}
+
+.primary:hover {
+  filter: brightness(1.03);
+}
+
+.primary:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.register-copy {
+  margin: 8px 0 0;
+  text-align: center;
+  color: #8d92af;
+  font-size: 0.62rem;
+}
+
+.register-copy strong {
+  color: #5b68d1;
+  font-weight: 700;
+}
+
+.message.error {
+  margin: 0 0 4px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 0.74rem;
+  background: rgba(196, 70, 70, 0.1);
+  color: #b73737;
+  border: 1px solid rgba(196, 70, 70, 0.16);
+}
+
+@media (min-width: 640px) {
+  .login-shell {
+    margin-top: -32px;
+    padding: 32px 16px;
+  }
+
+  .login-card {
+    width: min(100%, 352px);
+    padding: 18px 12px 12px;
+  }
+}

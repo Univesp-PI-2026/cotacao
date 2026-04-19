@@ -4,6 +4,15 @@ import { HttpClient } from '@angular/common/http';
 import { Customer } from './customer.model';
 import { CustomerFormValue } from './customer-form.value';
 
+type CustomerListResponse = {
+  data: Customer[];
+  total: number;
+};
+
+type CountResponse = {
+  total: number;
+};
+
 @Injectable({ providedIn: 'root' })
 export class CustomerService {
   private readonly http = inject(HttpClient);
@@ -11,7 +20,12 @@ export class CustomerService {
 
   list(filter: 'active' | 'inactive' | 'all') {
     const query = filter === 'all' ? '' : `?active=${filter === 'active' ? 1 : 0}`;
-    return this.http.get<Customer[]>(`${this.apiUrl}${query}`);
+    return this.http.get<CustomerListResponse>(`${this.apiUrl}${query}`);
+  }
+
+  count(filter: 'active' | 'inactive' | 'all') {
+    const query = filter === 'all' ? '' : `?active=${filter === 'active' ? 1 : 0}`;
+    return this.http.get<CountResponse>(`${this.apiUrl}/count${query}`);
   }
 
   getById(id: number) {
