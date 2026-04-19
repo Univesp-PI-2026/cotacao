@@ -62,7 +62,7 @@ services:
       - cotacao-network
 
   migrate:
-    image: flyway/flyway:10-alpine
+    image: flyway/flyway:12.4-alpine
     container_name: ${CONTAINER_PREFIX:-cotacao-v02}-${APP_ENV:-dev}-migrate
     command:
       - -connectRetries=60

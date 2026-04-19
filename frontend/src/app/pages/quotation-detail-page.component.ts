@@ -13,128 +13,214 @@ import { QuotationService } from '../quotation.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   template: `
-    <section class="detail-layout">
-      <article class="panel intro-panel">
-        <p class="eyebrow">Quotations</p>
-        <h2>{{ editingId ? 'Detalhe da cotação' : 'Nova cotação' }}</h2>
-        <p class="subtitle">
-          {{ editingId ? 'Atualize os dados do veículo e do seguro.' : 'A criação começa a partir do cliente selecionado na lista.' }}
-        </p>
+    <section class="quotation-page">
+      <header class="page-head">
+        <h2>{{ editingId ? 'Editar Cotação' : 'Nova Cotação' }}</h2>
+      </header>
 
-        <div class="summary" *ngIf="selectedCustomer">
-          <div><span class="label">Cliente</span><strong>{{ selectedCustomer.name }}</strong></div>
-          <div><span class="label">E-mail</span><strong>{{ selectedCustomer.email }}</strong></div>
-          <div><span class="label">Documento</span><strong>{{ selectedCustomer.is_foreign ? selectedCustomer.rnm : selectedCustomer.cpf }}</strong></div>
+      <article class="customer-panel" *ngIf="selectedCustomer">
+        <div class="panel-heading">
+          <strong>Cliente</strong>
         </div>
-
-        <div class="side-actions">
-          <a class="ghost link-button" routerLink="/quotations">Voltar para lista</a>
-          <button type="button" class="ghost" *ngIf="editingId && loadedQuotation?.active === 1" (click)="softDelete()">Desativar</button>
-          <button type="button" class="ghost" *ngIf="editingId && loadedQuotation?.active === 0" (click)="activate()">Ativar</button>
+        <div class="customer-grid">
+          <div><span class="caption">Nome</span><strong>{{ selectedCustomer.name }}</strong></div>
+          <div><span class="caption">CPF</span><strong>{{ selectedCustomer.is_foreign ? selectedCustomer.rnm : selectedCustomer.cpf }}</strong></div>
+          <div><span class="caption">E-mail</span><strong>{{ selectedCustomer.email }}</strong></div>
         </div>
       </article>
 
-      <article class="panel form-panel">
-        <form [formGroup]="form" (ngSubmit)="saveQuotation()" class="form">
+      <form [formGroup]="form" (ngSubmit)="saveQuotation()" class="quotation-grid">
+        <article class="form-card">
+          <div class="panel-heading">
+            <strong>Informações do Seguro</strong>
+          </div>
+
           <label>
-            <span>Cliente</span>
+            <span>Cliente*</span>
             <select formControlName="customer_id">
               <option [ngValue]="null">Selecione um cliente</option>
               <option *ngFor="let customer of customers" [ngValue]="customer.id">{{ customer.name }}</option>
             </select>
           </label>
 
-          <div class="grid two">
-            <label><span>Data da solicitação</span><input formControlName="request_date" type="date" /></label>
-            <label>
-              <span>Tipo de seguro</span>
-              <select formControlName="insurance_type">
-                <option [ngValue]="0">Novo seguro</option>
-                <option [ngValue]="1">Renovação</option>
-              </select>
-            </label>
-          </div>
+          <label>
+            <span>Data da Solicitação*</span>
+            <input formControlName="request_date" type="date" />
+          </label>
 
-          <div class="grid two" *ngIf="form.value.insurance_type === 1">
-            <label><span>Classe de bônus</span><input formControlName="bonus_class" type="text" /></label>
-            <label>
-              <span>Houve sinistros?</span>
-              <select formControlName="has_claims">
-                <option [ngValue]="false">Não</option>
-                <option [ngValue]="true">Sim</option>
-              </select>
-            </label>
-          </div>
+          <label>
+            <span>Tipo de Seguro*</span>
+            <select formControlName="insurance_type">
+              <option [ngValue]="0">Novo Seguro</option>
+              <option [ngValue]="1">Renovação</option>
+            </select>
+          </label>
 
-          <div class="grid two">
-            <label><span>Placa</span><input formControlName="vehicle_plate" type="text" /></label>
-            <label><span>Chassi</span><input formControlName="vehicle_chassis" type="text" /></label>
+          <label *ngIf="form.value.insurance_type === 1">
+            <span>Classe de Bônus</span>
+            <input formControlName="bonus_class" type="text" />
+          </label>
+        </article>
+
+        <article class="form-card">
+          <div class="panel-heading">
+            <strong>Veículo</strong>
           </div>
 
           <div class="grid two">
-            <label><span>Marca</span><input formControlName="vehicle_brand" type="text" /></label>
-            <label><span>Modelo</span><input formControlName="vehicle_model" type="text" /></label>
+            <label><span>Placa*</span><input formControlName="vehicle_plate" type="text" /></label>
+            <label><span>Chassi*</span><input formControlName="vehicle_chassis" type="text" /></label>
           </div>
-
-          <div class="grid three">
-            <label><span>Ano</span><input formControlName="manufacture_year" type="number" /></label>
-            <label><span>CEP de pernoite</span><input formControlName="overnight_zipcode" type="text" /></label>
-            <label><span>Idade do condutor</span><input formControlName="driver_age" type="number" /></label>
-          </div>
-
-          <label><span>Tempo de habilitação</span><input formControlName="license_time" type="text" /></label>
-          <label><span>Coberturas desejadas</span><input formControlName="coverages" type="text" placeholder="Ex: Basica, Terceiros, Vidros" /></label>
 
           <div class="grid two">
-            <label>
-              <span>Seguradora preferida?</span>
-              <select formControlName="has_insurer_preference">
-                <option [ngValue]="false">Não</option>
-                <option [ngValue]="true">Sim</option>
-              </select>
-            </label>
-            <label *ngIf="form.value.has_insurer_preference"><span>Qual seguradora?</span><input formControlName="preferred_insurer" type="text" /></label>
+            <label><span>Marca*</span><input formControlName="vehicle_brand" type="text" /></label>
+            <label><span>Modelo*</span><input formControlName="vehicle_model" type="text" /></label>
           </div>
 
-          <label class="toggle"><input formControlName="active" type="checkbox" /><span>Cotação ativa</span></label>
+          <div class="grid two">
+            <label><span>Ano de Fabricação*</span><input formControlName="manufacture_year" type="number" /></label>
+            <label><span>CEP de Pernoite*</span><input formControlName="overnight_zipcode" type="text" /></label>
+          </div>
+        </article>
 
-          <div class="actions">
-            <button class="primary" type="submit" [disabled]="saving">{{ saving ? 'Salvando...' : (editingId ? 'Salvar alteração' : 'Criar cotação') }}</button>
-            <button class="ghost" type="button" (click)="resetForm()">Limpar</button>
+        <article class="form-card">
+          <div class="panel-heading">
+            <strong>Condutor</strong>
           </div>
 
-          <p class="message success" *ngIf="successMessage">{{ successMessage }}</p>
-          <p class="message error" *ngIf="errorMessage">{{ errorMessage }}</p>
-        </form>
-      </article>
+          <label><span>Idade do Condutor*</span><input formControlName="driver_age" type="number" /></label>
+
+          <label><span>Tempo de Habilitação*</span><input formControlName="license_time" type="text" /></label>
+
+          <label>
+            <span>Tem seguradora preferida?*</span>
+            <select formControlName="has_insurer_preference">
+              <option [ngValue]="false">Não</option>
+              <option [ngValue]="true">Sim</option>
+            </select>
+          </label>
+
+          <label *ngIf="form.value.has_insurer_preference">
+            <span>Qual seguradora?</span>
+            <input formControlName="preferred_insurer" type="text" />
+          </label>
+
+          <label>
+            <span>Coberturas desejadas</span>
+            <textarea formControlName="coverages" rows="4"></textarea>
+          </label>
+        </article>
+
+        <div class="form-footer">
+          <div class="status-actions">
+            <a class="ghost link-button" routerLink="/quotations">Cancelar</a>
+            <button type="button" class="ghost" *ngIf="editingId && loadedQuotation?.active === 1" (click)="softDelete()">Desativar</button>
+            <button type="button" class="ghost" *ngIf="editingId && loadedQuotation?.active === 0" (click)="activate()">Ativar</button>
+            <label class="toggle"><input formControlName="active" type="checkbox" /><span>Ativa</span></label>
+          </div>
+
+          <div class="submit-actions">
+            <button class="ghost" type="button" (click)="resetForm()">Cancelar</button>
+            <button class="primary" type="submit" [disabled]="saving">
+              {{ saving ? 'Salvando...' : 'Salvar Cotação' }}
+            </button>
+          </div>
+        </div>
+
+        <p class="message success" *ngIf="successMessage">{{ successMessage }}</p>
+        <p class="message error" *ngIf="errorMessage">{{ errorMessage }}</p>
+      </form>
     </section>
   `,
   styles: [`
-    .detail-layout { display: grid; grid-template-columns: minmax(280px, 340px) 1fr; gap: 24px; align-items: start; }
-    .panel { background: color-mix(in srgb, var(--paper) 90%, white 10%); border: 1px solid rgba(215, 209, 194, 0.75); border-radius: 28px; padding: 24px; box-shadow: var(--shadow); backdrop-filter: blur(10px); }
-    .eyebrow { margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--accent); font-size: 12px; font-weight: 700; }
-    h2 { margin: 0; font-size: 1.6rem; }
-    .subtitle { margin: 12px 0 0; color: var(--muted); line-height: 1.5; }
-    .summary { display: grid; gap: 14px; margin: 24px 0; padding: 18px; border-radius: 22px; background: rgba(255, 255, 255, 0.7); border: 1px solid var(--line); }
-    .label { display: block; color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
-    .side-actions, .actions { display: flex; gap: 12px; flex-wrap: wrap; }
-    .form { display: grid; gap: 14px; }
-    .grid { display: grid; gap: 14px; }
+    .quotation-page { display: grid; gap: 14px; }
+    .page-head h2 { margin: 0; font-size: 1rem; color: #2d324d; }
+    .customer-panel,
+    .form-card {
+      background: #fff;
+      border: 1px solid #e7eaf4;
+      border-radius: 6px;
+      padding: 12px;
+      box-shadow: 0 2px 8px rgba(21, 28, 74, 0.04);
+    }
+    .panel-heading {
+      color: #4b57c5;
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .customer-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .caption {
+      display: block;
+      font-size: 0.56rem;
+      text-transform: uppercase;
+      color: #98a0b8;
+      margin-bottom: 4px;
+    }
+    .quotation-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr 0.95fr;
+      gap: 14px;
+      align-items: start;
+    }
+    .form-card { display: grid; gap: 10px; }
+    .grid { display: grid; gap: 10px; }
     .two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    label { display: grid; gap: 8px; color: var(--muted); font-size: 0.92rem; }
-    input, select { width: 100%; border: 1px solid var(--line); border-radius: 16px; padding: 13px 14px; font: inherit; color: var(--ink); background: #fffefb; }
-    .toggle { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
-    .toggle input { width: 18px; height: 18px; }
-    .primary, .ghost { border: 0; border-radius: 999px; padding: 12px 18px; font: inherit; cursor: pointer; transition: transform 180ms ease, background 180ms ease; }
-    .primary { background: var(--ink); color: white; box-shadow: var(--shadow); }
-    .ghost { background: rgba(255, 255, 255, 0.7); color: var(--ink); border: 1px solid var(--line); }
-    .link-button { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
-    .primary:hover, .ghost:hover { transform: translateY(-1px); }
-    .message { margin: 0; padding: 12px 14px; border-radius: 14px; font-size: 0.92rem; }
-    .success { background: var(--accent-soft); color: var(--accent); }
-    .error { background: rgba(187, 62, 62, 0.1); color: var(--danger); }
-    @media (max-width: 960px) { .detail-layout, .two, .three { grid-template-columns: 1fr; } }
+    label { display: grid; gap: 6px; color: #626982; font-size: 0.68rem; }
+    input, select, textarea {
+      width: 100%;
+      min-height: 36px;
+      border: 1px solid #d8dcec;
+      border-radius: 3px;
+      padding: 0 10px;
+      font: inherit;
+      color: #2f3650;
+      background: #fff;
+    }
+    textarea { padding: 10px; resize: vertical; min-height: 92px; }
+    .form-footer {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .status-actions,
+    .submit-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .toggle { display: inline-flex; align-items: center; gap: 8px; color: #565d76; }
+    .toggle input { width: 16px; height: 16px; }
+    .primary, .ghost {
+      border: 0;
+      border-radius: 3px;
+      min-height: 30px;
+      padding: 0 12px;
+      font: inherit;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .primary { background: #4b57c5; color: white; }
+    .ghost { background: #fff; color: #3f455e; border: 1px solid #d8dcec; text-decoration: none; }
+    .message { grid-column: 1 / -1; margin: 0; padding: 10px 12px; border-radius: 8px; font-size: 0.82rem; }
+    .success { background: #ecfff4; color: #1f8a56; }
+    .error { background: rgba(187, 62, 62, 0.1); color: #c44646; }
+    @media (max-width: 1024px) {
+      .quotation-grid { grid-template-columns: 1fr; }
+      .customer-grid, .two { grid-template-columns: 1fr; }
+      .form-footer { align-items: start; flex-direction: column; }
+    }
   `]
 })
 export class QuotationDetailPageComponent {
@@ -174,8 +260,8 @@ export class QuotationDetailPageComponent {
 
   constructor() {
     this.customerService.list('all').subscribe({
-      next: (customers) => {
-        this.customers = customers;
+      next: (response) => {
+        this.customers = response.data;
         this.syncSelectedCustomer();
       }
     });

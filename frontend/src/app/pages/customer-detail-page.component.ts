@@ -10,142 +10,243 @@ import { CustomerService } from '../customer.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   template: `
-    <section class="detail-layout">
-      <article class="panel intro-panel">
-        <p class="eyebrow">Customers</p>
-        <h2>{{ editingId ? 'Detalhe do cliente' : 'Novo cliente' }}</h2>
-        <p class="subtitle">
-          {{ editingId ? 'Edite os dados principais, acompanhe o status e salve sem sair da tela.' : 'Preencha os campos para criar um novo cliente e testar o fluxo do backend.' }}
-        </p>
+    <section class="customer-page">
+      <header class="page-head">
+        <h2>{{ editingId ? 'Detalhe do Cliente' : 'Novo Cliente' }}</h2>
+      </header>
 
-        <div class="summary" *ngIf="loadedCustomer">
-          <div><span class="label">Status</span><strong>{{ loadedCustomer.active === 1 ? 'Ativo' : 'Inativo' }}</strong></div>
-          <div><span class="label">Documento</span><strong>{{ loadedCustomer.is_foreign ? loadedCustomer.rnm : loadedCustomer.cpf }}</strong></div>
-          <div><span class="label">Localidade</span><strong>{{ loadedCustomer.city }}/{{ loadedCustomer.state }}</strong></div>
+      <article class="summary-panel" *ngIf="loadedCustomer">
+        <div class="panel-heading">
+          <strong>Cliente</strong>
         </div>
-
-        <div class="side-actions">
-          <a class="ghost link-button" routerLink="/customers">Voltar para lista</a>
-          <button type="button" class="ghost" *ngIf="editingId && loadedCustomer?.active === 1" (click)="softDelete()">Desativar</button>
-          <button type="button" class="ghost" *ngIf="editingId && loadedCustomer?.active === 0" (click)="activate()">Ativar</button>
+        <div class="summary-grid">
+          <div><span class="caption">Nome</span><strong>{{ loadedCustomer.name }}</strong></div>
+          <div><span class="caption">Documento</span><strong>{{ loadedCustomer.is_foreign ? loadedCustomer.rnm : loadedCustomer.cpf }}</strong></div>
+          <div><span class="caption">E-mail</span><strong>{{ loadedCustomer.email }}</strong></div>
+          <div><span class="caption">Status</span><strong>{{ loadedCustomer.active === 1 ? 'Ativo' : 'Inativo' }}</strong></div>
         </div>
       </article>
 
-      <article class="panel form-panel">
-        <form [formGroup]="form" (ngSubmit)="saveCustomer()" class="form">
-          <p class="message success" *ngIf="successMessage">{{ successMessage }}</p>
-          <p class="message error" *ngIf="errorMessage">{{ errorMessage }}</p>
-
-          <label>
-            <span>Nome</span>
-            <input formControlName="name" type="text" />
-            <small class="field-error" *ngIf="showFieldError('name')">{{ getFieldError('name') }}</small>
-          </label>
-
-          <label>
-            <span>E-mail</span>
-            <input formControlName="email" type="email" />
-            <small class="field-error" *ngIf="showFieldError('email')">{{ getFieldError('email') }}</small>
-          </label>
-
-          <label>
-            <span>Data de nascimento</span>
-            <input formControlName="birth_date" type="date" />
-            <small class="field-error" *ngIf="showFieldError('birth_date')">{{ getFieldError('birth_date') }}</small>
-          </label>
-
-          <label>
-            <span>Estrangeiro?</span>
-            <select formControlName="is_foreign">
-              <option [ngValue]="false">Nao</option>
-              <option [ngValue]="true">Sim</option>
-            </select>
-          </label>
-
-          <label *ngIf="!form.value.is_foreign">
-            <span>CPF</span>
-            <input formControlName="cpf" type="text" />
-            <small class="field-error" *ngIf="showFieldError('cpf')">{{ getFieldError('cpf') }}</small>
-          </label>
-
-          <label *ngIf="form.value.is_foreign">
-            <span>RNM</span>
-            <input formControlName="rnm" type="text" />
-            <small class="field-error" *ngIf="showFieldError('rnm')">{{ getFieldError('rnm') }}</small>
-          </label>
-
-          <label>
-            <span>CEP</span>
-            <input formControlName="zip_code" type="text" />
-            <small class="field-error" *ngIf="showFieldError('zip_code')">{{ getFieldError('zip_code') }}</small>
-          </label>
-
-          <label>
-            <span>Rua</span>
-            <input formControlName="street" type="text" />
-            <small class="field-error" *ngIf="showFieldError('street')">{{ getFieldError('street') }}</small>
-          </label>
-
-          <label>
-            <span>Numero</span>
-            <input formControlName="number" type="text" />
-            <small class="field-error" *ngIf="showFieldError('number')">{{ getFieldError('number') }}</small>
-          </label>
-
-          <label><span>Complemento</span><input formControlName="complement" type="text" /></label>
-
-          <label>
-            <span>Bairro</span>
-            <input formControlName="district" type="text" />
-            <small class="field-error" *ngIf="showFieldError('district')">{{ getFieldError('district') }}</small>
-          </label>
-
-          <label>
-            <span>Cidade</span>
-            <input formControlName="city" type="text" />
-            <small class="field-error" *ngIf="showFieldError('city')">{{ getFieldError('city') }}</small>
-          </label>
-
-          <label>
-            <span>Estado</span>
-            <input formControlName="state" type="text" maxlength="2" />
-            <small class="field-error" *ngIf="showFieldError('state')">{{ getFieldError('state') }}</small>
-          </label>
-
-          <label class="toggle"><input formControlName="active" type="checkbox" /><span>Cliente ativo</span></label>
-
-          <div class="actions">
-            <button class="primary" type="submit" [disabled]="saving">{{ saving ? 'Salvando...' : (editingId ? 'Salvar alteracoes' : 'Criar cliente') }}</button>
-            <button class="ghost" type="button" (click)="resetForm()">Limpar</button>
+      <form [formGroup]="form" (ngSubmit)="saveCustomer()" class="customer-grid">
+        <article class="form-card">
+          <div class="panel-heading">
+            <strong>Dados do Cliente</strong>
           </div>
-        </form>
-      </article>
+
+          <div class="grid two">
+            <label>
+              <span>Nome*</span>
+              <input formControlName="name" type="text" />
+              <small class="field-error" *ngIf="showFieldError('name')">{{ getFieldError('name') }}</small>
+            </label>
+
+            <label>
+              <span>E-mail*</span>
+              <input formControlName="email" type="email" />
+              <small class="field-error" *ngIf="showFieldError('email')">{{ getFieldError('email') }}</small>
+            </label>
+          </div>
+
+          <div class="grid three">
+            <label>
+              <span>Data de nascimento*</span>
+              <input formControlName="birth_date" type="date" />
+              <small class="field-error" *ngIf="showFieldError('birth_date')">{{ getFieldError('birth_date') }}</small>
+            </label>
+
+            <label>
+              <span>Estrangeiro?</span>
+              <select formControlName="is_foreign">
+                <option [ngValue]="false">Não</option>
+                <option [ngValue]="true">Sim</option>
+              </select>
+            </label>
+
+            <label *ngIf="!form.value.is_foreign">
+              <span>CPF*</span>
+              <input formControlName="cpf" type="text" />
+              <small class="field-error" *ngIf="showFieldError('cpf')">{{ getFieldError('cpf') }}</small>
+            </label>
+
+            <label *ngIf="form.value.is_foreign">
+              <span>RNM*</span>
+              <input formControlName="rnm" type="text" />
+              <small class="field-error" *ngIf="showFieldError('rnm')">{{ getFieldError('rnm') }}</small>
+            </label>
+          </div>
+        </article>
+
+        <article class="form-card">
+          <div class="panel-heading">
+            <strong>Endereço</strong>
+          </div>
+
+          <div class="grid three">
+            <label>
+              <span>CEP*</span>
+              <input formControlName="zip_code" type="text" />
+              <small class="field-error" *ngIf="showFieldError('zip_code')">{{ getFieldError('zip_code') }}</small>
+            </label>
+
+            <label>
+              <span>Rua*</span>
+              <input formControlName="street" type="text" />
+              <small class="field-error" *ngIf="showFieldError('street')">{{ getFieldError('street') }}</small>
+            </label>
+
+            <label>
+              <span>Número*</span>
+              <input formControlName="number" type="text" />
+              <small class="field-error" *ngIf="showFieldError('number')">{{ getFieldError('number') }}</small>
+            </label>
+          </div>
+
+          <div class="grid three">
+            <label>
+              <span>Complemento</span>
+              <input formControlName="complement" type="text" />
+            </label>
+
+            <label>
+              <span>Bairro*</span>
+              <input formControlName="district" type="text" />
+              <small class="field-error" *ngIf="showFieldError('district')">{{ getFieldError('district') }}</small>
+            </label>
+
+            <label>
+              <span>Cidade*</span>
+              <input formControlName="city" type="text" />
+              <small class="field-error" *ngIf="showFieldError('city')">{{ getFieldError('city') }}</small>
+            </label>
+          </div>
+
+          <div class="grid two">
+            <label>
+              <span>Estado*</span>
+              <input formControlName="state" type="text" maxlength="2" />
+              <small class="field-error" *ngIf="showFieldError('state')">{{ getFieldError('state') }}</small>
+            </label>
+
+            <label class="toggle">
+              <input formControlName="active" type="checkbox" />
+              <span>Cliente ativo</span>
+            </label>
+          </div>
+        </article>
+
+        <div class="form-footer">
+          <div class="status-actions">
+            <a class="ghost link-button" routerLink="/customers">Cancelar</a>
+            <button type="button" class="ghost" *ngIf="editingId && loadedCustomer?.active === 1" (click)="softDelete()">Desativar</button>
+            <button type="button" class="ghost" *ngIf="editingId && loadedCustomer?.active === 0" (click)="activate()">Ativar</button>
+          </div>
+
+          <div class="submit-actions">
+            <button class="ghost" type="button" (click)="resetForm()">Limpar</button>
+            <button class="primary" type="submit" [disabled]="saving">
+              {{ saving ? 'Salvando...' : (editingId ? 'Salvar Cliente' : 'Criar Cliente') }}
+            </button>
+          </div>
+        </div>
+
+        <p class="message success" *ngIf="successMessage">{{ successMessage }}</p>
+        <p class="message error" *ngIf="errorMessage">{{ errorMessage }}</p>
+      </form>
     </section>
   `,
   styles: [`
-    .detail-layout { display: grid; grid-template-columns: minmax(280px, 340px) 1fr; gap: 24px; align-items: start; }
-    .panel { background: color-mix(in srgb, var(--paper) 90%, white 10%); border: 1px solid rgba(215, 209, 194, 0.75); border-radius: 28px; padding: 24px; box-shadow: var(--shadow); backdrop-filter: blur(10px); }
-    .eyebrow { margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--accent); font-size: 12px; font-weight: 700; }
-    h2 { margin: 0; font-size: 1.6rem; }
-    .subtitle { margin: 12px 0 0; color: var(--muted); line-height: 1.5; }
-    .summary { display: grid; gap: 14px; margin: 24px 0; padding: 18px; border-radius: 22px; background: rgba(255, 255, 255, 0.7); border: 1px solid var(--line); }
-    .label { display: block; color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
-    .side-actions, .actions { display: flex; gap: 12px; flex-wrap: wrap; }
-    .form { display: grid; gap: 14px; }
-    label { display: grid; gap: 8px; color: var(--muted); font-size: 0.92rem; }
-    input, select { width: 100%; border: 1px solid var(--line); border-radius: 16px; padding: 13px 14px; font: inherit; color: var(--ink); background: #fffefb; }
-    .field-error { color: var(--danger); font-size: 0.82rem; }
-    .toggle { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
-    .toggle input { width: 18px; height: 18px; }
-    .primary, .ghost { border: 0; border-radius: 999px; padding: 12px 18px; font: inherit; cursor: pointer; transition: transform 180ms ease, background 180ms ease; }
-    .primary { background: var(--ink); color: white; box-shadow: var(--shadow); }
-    .ghost { background: rgba(255, 255, 255, 0.7); color: var(--ink); border: 1px solid var(--line); }
-    .link-button { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
-    .primary:hover, .ghost:hover { transform: translateY(-1px); }
-    .message { margin: 0; padding: 12px 14px; border-radius: 14px; font-size: 0.92rem; }
-    .success { background: var(--accent-soft); color: var(--accent); }
-    .error { background: rgba(187, 62, 62, 0.1); color: var(--danger); }
-    @media (max-width: 960px) { .detail-layout { grid-template-columns: 1fr; } }
+    .customer-page { display: grid; gap: 14px; }
+    .page-head h2 { margin: 0; font-size: 1rem; color: #2d324d; }
+    .summary-panel,
+    .form-card {
+      background: #fff;
+      border: 1px solid #e7eaf4;
+      border-radius: 6px;
+      padding: 12px;
+      box-shadow: 0 2px 8px rgba(21, 28, 74, 0.04);
+    }
+    .panel-heading {
+      color: #4b57c5;
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .caption {
+      display: block;
+      font-size: 0.56rem;
+      text-transform: uppercase;
+      color: #98a0b8;
+      margin-bottom: 4px;
+    }
+    .customer-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .form-card { display: grid; gap: 10px; }
+    .grid { display: grid; gap: 10px; }
+    .two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    label { display: grid; gap: 6px; color: #626982; font-size: 0.68rem; }
+    input, select {
+      width: 100%;
+      min-height: 36px;
+      border: 1px solid #d8dcec;
+      border-radius: 3px;
+      padding: 0 10px;
+      font: inherit;
+      color: #2f3650;
+      background: #fff;
+    }
+    .field-error { color: #c44646; font-size: 0.72rem; }
+    .form-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .status-actions,
+    .submit-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #565d76;
+      min-height: 36px;
+    }
+    .toggle input { width: 16px; height: 16px; }
+    .primary, .ghost {
+      border: 0;
+      border-radius: 3px;
+      min-height: 30px;
+      padding: 0 12px;
+      font: inherit;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .primary { background: #4b57c5; color: white; }
+    .ghost { background: #fff; color: #3f455e; border: 1px solid #d8dcec; text-decoration: none; }
+    .message { margin: 0; padding: 10px 12px; border-radius: 8px; font-size: 0.82rem; }
+    .success { background: #ecfff4; color: #1f8a56; }
+    .error { background: rgba(187, 62, 62, 0.1); color: #c44646; }
+    @media (max-width: 1024px) {
+      .summary-grid,
+      .customer-grid,
+      .two,
+      .three { grid-template-columns: 1fr; }
+      .form-footer { align-items: start; flex-direction: column; }
+    }
   `]
 })
 export class CustomerDetailPageComponent {

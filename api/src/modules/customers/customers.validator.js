@@ -1,3 +1,5 @@
+const { t } = require("../../utils/i18n");
+
 function normalizeBoolean(value) {
   if (typeof value === "boolean") {
     return value;
@@ -14,63 +16,65 @@ function normalizeBoolean(value) {
   return null;
 }
 
-function validateCustomerPayload(payload) {
+function validateCustomerPayload(payload, locale) {
   const errors = [];
   const isForeign = normalizeBoolean(payload.is_foreign);
 
   if (!payload.name || String(payload.name).trim() === "") {
-    errors.push("name is required");
+    errors.push(t("customers.validation.name_required", locale));
   }
 
   if (!payload.email || String(payload.email).trim() === "") {
-    errors.push("email is required");
+    errors.push(t("customers.validation.email_required", locale));
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(payload.email))) {
-    errors.push("email must be valid");
+    errors.push(t("customers.validation.email_invalid", locale));
   }
 
   if (isForeign === null) {
-    errors.push("is_foreign must be boolean");
+    errors.push(t("customers.validation.is_foreign_invalid", locale));
   }
 
   if (!payload.birth_date) {
-    errors.push("birth_date is required");
+    errors.push(t("customers.validation.birth_date_required", locale));
   }
 
   if (!payload.zip_code || String(payload.zip_code).trim() === "") {
-    errors.push("zip_code is required");
+    errors.push(t("customers.validation.zip_code_required", locale));
   }
 
   if (!payload.street || String(payload.street).trim() === "") {
-    errors.push("street is required");
+    errors.push(t("customers.validation.street_required", locale));
   }
 
   if (!payload.number || String(payload.number).trim() === "") {
-    errors.push("number is required");
+    errors.push(t("customers.validation.number_required", locale));
   }
 
   if (!payload.district || String(payload.district).trim() === "") {
-    errors.push("district is required");
+    errors.push(t("customers.validation.district_required", locale));
   }
 
   if (!payload.city || String(payload.city).trim() === "") {
-    errors.push("city is required");
+    errors.push(t("customers.validation.city_required", locale));
   }
 
   if (!payload.state || String(payload.state).trim() === "") {
-    errors.push("state is required");
+    errors.push(t("customers.validation.state_required", locale));
   }
 
   if (isForeign === false && (!payload.cpf || String(payload.cpf).trim() === "")) {
-    errors.push("cpf is required when is_foreign is false");
+    errors.push(t("customers.validation.cpf_required", locale));
   }
 
   if (isForeign === true && (!payload.rnm || String(payload.rnm).trim() === "")) {
-    errors.push("rnm is required when is_foreign is true");
+    errors.push(t("customers.validation.rnm_required", locale));
   }
 
   if (errors.length > 0) {
     return { errors };
   }
+
+  const normalizedActive = normalizeBoolean(payload.active);
 
   return {
     data: {
@@ -87,7 +91,7 @@ function validateCustomerPayload(payload) {
       district: String(payload.district).trim(),
       city: String(payload.city).trim(),
       state: String(payload.state).trim().toUpperCase(),
-      active: normalizeBoolean(payload.active) === null ? 1 : normalizeBoolean(payload.active) ? 1 : 0
+      active: normalizedActive === null ? 1 : normalizedActive ? 1 : 0
     }
   };
 }

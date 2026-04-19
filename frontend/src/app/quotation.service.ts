@@ -4,6 +4,15 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Quotation } from './quotation.model';
 import { QuotationFormValue } from './quotation-form.value';
 
+type QuotationListResponse = {
+  data: Quotation[];
+  total: number;
+};
+
+type CountResponse = {
+  total: number;
+};
+
 @Injectable({ providedIn: 'root' })
 export class QuotationService {
   private readonly http = inject(HttpClient);
@@ -20,7 +29,21 @@ export class QuotationService {
       params = params.set('customer_id', filter.customerId);
     }
 
-    return this.http.get<Quotation[]>(this.apiUrl, { params });
+    return this.http.get<QuotationListResponse>(this.apiUrl, { params });
+  }
+
+  count(filter: { active?: 'active' | 'inactive' | 'all'; customerId?: number | null }) {
+    let params = new HttpParams();
+
+    if (filter.active && filter.active !== 'all') {
+      params = params.set('active', filter.active === 'active' ? 1 : 0);
+    }
+
+    if (filter.customerId) {
+      params = params.set('customer_id', filter.customerId);
+    }
+
+    return this.http.get<CountResponse>(`${this.apiUrl}/count`, { params });
   }
 
   getById(id: number) {

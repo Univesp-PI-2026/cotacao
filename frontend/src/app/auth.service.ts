@@ -14,6 +14,11 @@ type AuthState = {
   user: User;
 };
 
+type JwtPayload = {
+  exp?: number;
+  [key: string]: unknown;
+};
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
@@ -36,6 +41,23 @@ export class AuthService {
     this.currentUser.set(user);
   }
 
+  updateCurrentUser(user: User): void {
+    const authState = this.authState();
+
+    if (!authState) {
+      return;
+    }
+
+    const nextState = {
+      ...authState,
+      user
+    };
+
+    localStorage.setItem(this.storageKey, JSON.stringify(nextState));
+    this.authState.set(nextState);
+    this.currentUser.set(user);
+  }
+
   logout(): void {
     localStorage.removeItem(this.storageKey);
     this.authState.set(null);
@@ -44,11 +66,30 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return this.authState() !== null;
+    return this.hasValidSession();
   }
 
   getToken(): string | null {
+    if (!this.hasValidSession()) {
+      return null;
+    }
+
     return this.authState()?.token ?? null;
+  }
+
+  hasValidSession(): boolean {
+    const authState = this.authState();
+
+    if (!authState) {
+      return false;
+    }
+
+    if (this.isTokenExpired(authState.token)) {
+      this.clearSession();
+      return false;
+    }
+
+    return true;
   }
 
   private readStoredState(): AuthState | null {
@@ -58,9 +99,49 @@ export class AuthService {
     }
 
     try {
-      return JSON.parse(rawValue) as AuthState;
+      const parsed = JSON.parse(rawValue) as AuthState;
+
+      if (!parsed?.token || !parsed?.user || this.isTokenExpired(parsed.token)) {
+        localStorage.removeItem(this.storageKey);
+        return null;
+      }
+
+      return parsed;
     } catch {
       localStorage.removeItem(this.storageKey);
+      return null;
+    }
+  }
+
+  private clearSession(): void {
+    localStorage.removeItem(this.storageKey);
+    this.authState.set(null);
+    this.currentUser.set(null);
+  }
+
+  private isTokenExpired(token: string): boolean {
+    const payload = this.decodeToken(token);
+
+    if (!payload?.exp) {
+      return true;
+    }
+
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+    return payload.exp <= nowInSeconds;
+  }
+
+  private decodeToken(token: string): JwtPayload | null {
+    const parts = token.split('.');
+
+    if (parts.length !== 3) {
+      return null;
+    }
+
+    try {
+      const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const normalizedBase64 = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
+      return JSON.parse(atob(normalizedBase64)) as JwtPayload;
+    } catch {
       return null;
     }
   }

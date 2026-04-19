@@ -9,11 +9,14 @@ import { RoleDetailPageComponent } from './pages/role-detail-page.component';
 import { UserListPageComponent } from './pages/user-list-page.component';
 import { UserDetailPageComponent } from './pages/user-detail-page.component';
 import { LoginPageComponent } from './pages/login-page.component';
+import { DashboardPageComponent } from './pages/dashboard-page.component';
+import { ProfilePageComponent } from './pages/profile-page.component';
 import { authGuard } from './auth.guard';
 
 export const appRoutes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
   { path: 'login', component: LoginPageComponent },
+  { path: 'dashboard', component: DashboardPageComponent, canActivate: [authGuard] },
   { path: 'customers', component: CustomerListPageComponent, canActivate: [authGuard] },
   { path: 'customers/new', component: CustomerDetailPageComponent, canActivate: [authGuard] },
   { path: 'customers/:id', component: CustomerDetailPageComponent, canActivate: [authGuard] },
@@ -23,8 +26,9 @@ export const appRoutes: Routes = [
   { path: 'users', component: UserListPageComponent, canActivate: [authGuard] },
   { path: 'users/new', component: UserDetailPageComponent, canActivate: [authGuard] },
   { path: 'users/:id', component: UserDetailPageComponent, canActivate: [authGuard] },
+  { path: 'profile', component: ProfilePageComponent, canActivate: [authGuard] },
   { path: 'quotations', component: QuotationListPageComponent, canActivate: [authGuard] },
   { path: 'quotations/new', component: QuotationDetailPageComponent, canActivate: [authGuard] },
   { path: 'quotations/:id', component: QuotationDetailPageComponent, canActivate: [authGuard] },
-  { path: '**', redirectTo: 'login' }
+  { path: '**', redirectTo: 'dashboard' }
 ];
