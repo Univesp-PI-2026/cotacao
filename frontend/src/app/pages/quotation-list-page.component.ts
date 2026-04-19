@@ -79,7 +79,7 @@ import { QuotationService } from '../quotation.service';
 
           <div class="card-actions">
             <a class="ghost link-button compact" [routerLink]="['/quotations', quotation.id]">✎ Editar</a>
-            <button type="button" class="ghost compact danger" *ngIf="quotation.active === 1" (click)="softDelete(quotation.id)">■ Excluir</button>
+            <button type="button" class="ghost compact danger" *ngIf="quotation.active === 1" (click)="softDelete(quotation.id)">■ Desativar</button>
             <button type="button" class="ghost compact accent" *ngIf="quotation.active === 0" (click)="activate(quotation.id)">↺ Ativar</button>
           </div>
         </article>

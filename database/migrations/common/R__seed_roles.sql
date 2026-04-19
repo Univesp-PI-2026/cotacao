@@ -1,7 +1,8 @@
-INSERT INTO roles (name)
+INSERT INTO roles (name, active)
 VALUES
-  ('admin'),
-  ('atendente'),
-  ('cliente')
+  ('admin', 1),
+  ('atendente', 1),
+  ('cliente', 1)
 ON DUPLICATE KEY UPDATE
-  name = VALUES(name);
+  name = VALUES(name),
+  active = VALUES(active);

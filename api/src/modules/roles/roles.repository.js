@@ -4,6 +4,7 @@ const roleSelect = `
   SELECT
     r.id,
     r.name,
+    r.active,
     r.created_at,
     r.updated_at,
     COUNT(u.id) AS users_count
@@ -11,11 +12,20 @@ const roleSelect = `
   LEFT JOIN users u ON u.role_id = r.id
 `;
 
-async function findAll() {
+async function findAll(filters = {}) {
+  let sql = roleSelect;
+  const params = [];
+
+  if (filters.active === 0 || filters.active === 1) {
+    sql += " WHERE r.active = ?";
+    params.push(filters.active);
+  }
+
   const [rows] = await pool.query(
-    `${roleSelect}
-    GROUP BY r.id, r.name, r.created_at, r.updated_at
-    ORDER BY r.name ASC`
+    `${sql}
+    GROUP BY r.id, r.name, r.active, r.created_at, r.updated_at
+    ORDER BY r.name ASC`,
+    params
   );
 
   return rows;
@@ -25,7 +35,7 @@ async function findById(id) {
   const [rows] = await pool.query(
     `${roleSelect}
     WHERE r.id = ?
-    GROUP BY r.id, r.name, r.created_at, r.updated_at
+    GROUP BY r.id, r.name, r.active, r.created_at, r.updated_at
     LIMIT 1`,
     [id]
   );
@@ -35,8 +45,8 @@ async function findById(id) {
 
 async function create(data) {
   const [result] = await pool.query(
-    "INSERT INTO roles (name) VALUES (?)",
-    [data.name]
+    "INSERT INTO roles (name, active) VALUES (?, ?)",
+    [data.name, data.active]
   );
 
   return result.insertId;
@@ -44,13 +54,18 @@ async function create(data) {
 
 async function update(id, data) {
   await pool.query(
-    "UPDATE roles SET name = ? WHERE id = ?",
-    [data.name, id]
+    "UPDATE roles SET name = ?, active = ? WHERE id = ?",
+    [data.name, data.active, id]
   );
 }
 
-async function remove(id) {
-  await pool.query("DELETE FROM roles WHERE id = ?", [id]);
+async function updateActiveStatus(id, active) {
+  const [result] = await pool.query(
+    "UPDATE roles SET active = ? WHERE id = ?",
+    [active, id]
+  );
+
+  return result.affectedRows;
 }
 
 async function countUsersByRoleId(roleId) {
@@ -67,6 +82,6 @@ module.exports = {
   create,
   findAll,
   findById,
-  remove,
-  update
+  update,
+  updateActiveStatus
 };

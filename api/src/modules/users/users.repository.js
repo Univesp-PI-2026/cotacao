@@ -78,7 +78,7 @@ async function findById(id) {
 
 async function roleExists(roleId) {
   const [rows] = await pool.query(
-    "SELECT id FROM roles WHERE id = ? LIMIT 1",
+    "SELECT id FROM roles WHERE id = ? AND active = 1 LIMIT 1",
     [roleId]
   );
 

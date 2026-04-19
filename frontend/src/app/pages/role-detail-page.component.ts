@@ -20,13 +20,15 @@ import { RoleService } from '../role.service';
 
         <div class="summary" *ngIf="loadedRole">
           <div><span class="label">Nome</span><strong>{{ loadedRole.name }}</strong></div>
+          <div><span class="label">Status</span><strong>{{ loadedRole.active === 1 ? 'Ativa' : 'Inativa' }}</strong></div>
           <div><span class="label">Usuários vinculados</span><strong>{{ loadedRole.users_count }}</strong></div>
           <div><span class="label">Criada em</span><strong>{{ loadedRole.created_at | date:'dd/MM/yyyy HH:mm' }}</strong></div>
         </div>
 
         <div class="side-actions">
           <a class="ghost link-button" routerLink="/roles">Voltar para lista</a>
-          <button type="button" class="ghost danger" *ngIf="editingId" (click)="deleteRole()">Excluir</button>
+          <button type="button" class="ghost danger" *ngIf="editingId && loadedRole?.active === 1" (click)="deactivateRole()">Desativar</button>
+          <button type="button" class="ghost" *ngIf="editingId && loadedRole?.active === 0" (click)="activateRole()">Ativar</button>
         </div>
       </article>
 
@@ -39,6 +41,11 @@ import { RoleService } from '../role.service';
             <span>Nome da role</span>
             <input formControlName="name" type="text" />
             <small class="field-error" *ngIf="showFieldError('name')">{{ getFieldError('name') }}</small>
+          </label>
+
+          <label class="toggle">
+            <input formControlName="active" type="checkbox" />
+            <span>Role ativa</span>
           </label>
 
           <div class="actions">
@@ -62,6 +69,8 @@ import { RoleService } from '../role.service';
     label { display: grid; gap: 8px; color: var(--muted); font-size: 0.92rem; }
     input { width: 100%; border: 1px solid var(--line); border-radius: 16px; padding: 13px 14px; font: inherit; color: var(--ink); background: #fffefb; }
     .field-error { color: var(--danger); font-size: 0.82rem; }
+    .toggle { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+    .toggle input { width: 18px; height: 18px; }
     .primary, .ghost { border: 0; border-radius: 999px; padding: 12px 18px; font: inherit; cursor: pointer; transition: transform 180ms ease, background 180ms ease; }
     .primary { background: var(--ink); color: white; box-shadow: var(--shadow); }
     .ghost { background: rgba(255, 255, 255, 0.7); color: var(--ink); border: 1px solid var(--line); }
@@ -88,7 +97,8 @@ export class RoleDetailPageComponent {
   protected serverFieldErrors: Partial<Record<keyof typeof this.form.controls, string>> = {};
 
   protected readonly form = this.fb.nonNullable.group({
-    name: ['', [Validators.required]]
+    name: ['', [Validators.required]],
+    active: [true]
   });
 
   constructor() {
@@ -117,7 +127,7 @@ export class RoleDetailPageComponent {
     this.roleService.getById(id).subscribe({
       next: (role) => {
         this.loadedRole = role;
-        this.form.patchValue({ name: role.name });
+        this.form.patchValue({ name: role.name, active: role.active === 1 });
       },
       error: () => {
         this.errorMessage = 'Nao foi possivel carregar a role.';
@@ -166,19 +176,43 @@ export class RoleDetailPageComponent {
     });
   }
 
-  protected deleteRole(): void {
+  protected deactivateRole(): void {
     if (!this.editingId) return;
 
     this.errorMessage = '';
     this.successMessage = '';
 
-    this.roleService.delete(this.editingId).subscribe({
+    this.roleService.softDelete(this.editingId).subscribe({
       next: () => {
-        void this.router.navigate(['/roles']);
+        this.successMessage = 'Role desativada com sucesso.';
+        if (this.loadedRole) {
+          this.loadedRole = { ...this.loadedRole, active: 0 };
+        }
+        this.form.patchValue({ active: false });
       },
       error: (error) => {
         const apiErrors = Array.isArray(error?.error?.errors) ? error.error.errors : [];
-        this.errorMessage = apiErrors.length > 0 ? this.translateApiError(apiErrors[0]) : 'Nao foi possivel remover a role.';
+        this.errorMessage = apiErrors.length > 0 ? this.translateApiError(apiErrors[0]) : 'Nao foi possivel desativar a role.';
+      }
+    });
+  }
+
+  protected activateRole(): void {
+    if (!this.editingId) return;
+
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.roleService.activate(this.editingId).subscribe({
+      next: () => {
+        this.successMessage = 'Role ativada com sucesso.';
+        if (this.loadedRole) {
+          this.loadedRole = { ...this.loadedRole, active: 1 };
+        }
+        this.form.patchValue({ active: true });
+      },
+      error: () => {
+        this.errorMessage = 'Nao foi possivel ativar a role.';
       }
     });
   }
@@ -188,10 +222,10 @@ export class RoleDetailPageComponent {
     this.errorMessage = '';
     this.successMessage = '';
     if (this.loadedRole) {
-      this.form.patchValue({ name: this.loadedRole.name });
+      this.form.patchValue({ name: this.loadedRole.name, active: this.loadedRole.active === 1 });
       return;
     }
-    this.form.reset({ name: '' });
+    this.form.reset({ name: '', active: true });
   }
 
   protected showFieldError(fieldName: keyof typeof this.form.controls): boolean {
@@ -231,14 +265,10 @@ export class RoleDetailPageComponent {
       return 'Ja existe uma role com esse nome.';
     }
 
-    if (normalizedError === 'role is being used by users') {
-      return 'Nao e possivel excluir esta role porque ela esta vinculada a usuarios.';
-    }
-
     if (normalizedError.includes('is required')) {
       return 'Este campo e obrigatorio.';
     }
 
-    return 'Campo invalido.';
+    return errorMessage;
   }
 }

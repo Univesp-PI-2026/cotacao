@@ -68,7 +68,7 @@ import { UserService } from '../user.service';
 
           <div class="card-actions">
             <a class="ghost link-button compact" [routerLink]="['/users', user.id]">✎ Editar</a>
-            <button type="button" class="ghost compact danger" *ngIf="user.active === 1" (click)="softDelete(user.id)">■ Excluir</button>
+            <button type="button" class="ghost compact danger" *ngIf="user.active === 1" (click)="softDelete(user.id)">■ Desativar</button>
             <button type="button" class="ghost compact accent" *ngIf="user.active === 0" (click)="activate(user.id)">↺ Ativar</button>
           </div>
         </article>

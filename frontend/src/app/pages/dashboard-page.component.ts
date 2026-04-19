@@ -158,37 +158,46 @@ export class DashboardPageComponent {
   private readonly userService = inject(UserService);
 
   protected firstName = this.authService.currentUser()?.name?.split(' ')[0] || 'teste';
-  protected cards: DashboardCard[] = [
-    {
-      title: 'CLIENTES',
-      value: 0,
-      subtitle: 'Cadastros de clientes',
-      link: '/customers',
-      linkLabel: 'Ver lista',
-      secondaryLink: '/customers/new',
-      secondaryLabel: 'Novo',
-      tone: 'indigo'
-    },
-    {
-      title: 'COTAÇÕES',
-      value: 0,
-      subtitle: 'Cotações de seguro',
-      link: '/quotations',
-      linkLabel: 'Ver lista',
-      tone: 'pink'
-    },
-    {
-      title: 'USUÁRIOS',
-      value: 0,
-      subtitle: 'Usuários do sistema',
-      link: '/users',
-      linkLabel: 'Ver lista',
-      tone: 'teal'
-    }
-  ];
+  protected cards: DashboardCard[] = this.buildCards();
 
   constructor() {
     this.loadMetrics();
+  }
+
+  private buildCards(): DashboardCard[] {
+    const cards: DashboardCard[] = [
+      {
+        title: 'CLIENTES',
+        value: 0,
+        subtitle: 'Cadastros de clientes',
+        link: '/customers',
+        linkLabel: 'Ver lista',
+        secondaryLink: '/customers/new',
+        secondaryLabel: 'Novo',
+        tone: 'indigo'
+      },
+      {
+        title: 'COTAÇÕES',
+        value: 0,
+        subtitle: 'Cotações de seguro',
+        link: '/quotations',
+        linkLabel: 'Ver lista',
+        tone: 'pink'
+      }
+    ];
+
+    if (this.authService.currentUser()?.role_name === 'admin') {
+      cards.push({
+        title: 'USUÁRIOS',
+        value: 0,
+        subtitle: 'Usuários do sistema',
+        link: '/users',
+        linkLabel: 'Ver lista',
+        tone: 'teal'
+      });
+    }
+
+    return cards;
   }
 
   private loadMetrics(): void {
@@ -204,11 +213,13 @@ export class DashboardPageComponent {
       }
     });
 
-    this.userService.count({ active: 'active' }).subscribe({
-      next: (response) => {
-        this.updateCard('USUÁRIOS', response.total);
-      }
-    });
+    if (this.authService.currentUser()?.role_name === 'admin') {
+      this.userService.count({ active: 'active' }).subscribe({
+        next: (response) => {
+          this.updateCard('USUÁRIOS', response.total);
+        }
+      });
+    }
   }
 
   private updateCard(title: DashboardCard['title'], value: number): void {

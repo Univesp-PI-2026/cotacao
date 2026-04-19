@@ -10,7 +10,7 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   const locale = getRequestLocale(req);
   try {
-    const roles = await roleService.listRoles();
+    const roles = await roleService.listRolesByQuery(req.query);
     return res.json(roles);
   } catch (error) {
     return serverError(res, error, "roles.list_failed", locale);
@@ -78,8 +78,8 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   const locale = getRequestLocale(req);
   try {
-    await roleService.deleteRole(req.params.id);
-    return res.json({ message: t("roles.deleted_success", locale) });
+    await roleService.deactivateRole(req.params.id);
+    return res.json({ message: t("roles.deactivated_success", locale) });
   } catch (error) {
     if (error.statusCode === 404) {
       return notFound(res, error.message, locale);
@@ -89,7 +89,21 @@ router.delete("/:id", async (req, res) => {
       return badRequest(res, [t(error.message, locale)], locale);
     }
 
-    return serverError(res, error, "roles.delete_failed", locale);
+    return serverError(res, error, "roles.deactivate_failed", locale);
+  }
+});
+
+router.patch("/:id/activate", async (req, res) => {
+  const locale = getRequestLocale(req);
+  try {
+    await roleService.activateRole(req.params.id);
+    return res.json({ message: t("roles.activated_success", locale) });
+  } catch (error) {
+    if (error.statusCode === 404) {
+      return notFound(res, error.message, locale);
+    }
+
+    return serverError(res, error, "roles.activate_failed", locale);
   }
 });
 

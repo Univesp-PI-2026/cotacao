@@ -7,10 +7,13 @@ module.exports = {
   auth: {
     token_missing: "Token not provided",
     token_invalid: "Invalid or expired token",
-    login_required_fields: "identifier and password are required",
-    invalid_credentials: "Invalid credentials",
-    inactive_user: "Inactive user",
-    login_failed: "Authentication failed"
+    invalid_credentials: "Invalid username, email, or password",
+    inactive_user: "Your user is inactive",
+    login_failed: "Could not authenticate",
+    validation: {
+      identifier_required: "Enter your username or email",
+      password_required: "Enter your password"
+    }
   },
   customers: {
     not_found: "Customer not found",
@@ -69,10 +72,12 @@ module.exports = {
     fetch_failed: "Failed to fetch role",
     create_failed: "Failed to create role",
     update_failed: "Failed to update role",
-    delete_failed: "Failed to delete role",
-    deleted_success: "Role deleted successfully",
+    activate_failed: "Failed to activate role",
+    deactivate_failed: "Failed to deactivate role",
+    activated_success: "Role activated successfully",
+    deactivated_success: "Role deactivated successfully",
     duplicate_name: "A role with this name already exists",
-    in_use: "Role is being used by users",
+    in_use: "This role cannot be deactivated because it is assigned to users",
     validation: {
       name_required: "Role name is required"
     }

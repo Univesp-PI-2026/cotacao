@@ -33,7 +33,7 @@ import { RoleService } from '../role.service';
               <h3>{{ role.name }}</h3>
               <p>{{ role.users_count }} usuário(s) vinculado(s)</p>
             </div>
-            <span class="badge">ID {{ role.id }}</span>
+            <span class="badge" [class.inactive]="role.active === 0">{{ role.active === 1 ? 'Ativa' : 'Inativa' }}</span>
           </div>
 
           <dl>
@@ -49,7 +49,8 @@ import { RoleService } from '../role.service';
 
           <div class="card-actions">
             <a class="ghost link-button" [routerLink]="['/roles', role.id]">Ver detalhe</a>
-            <button type="button" class="ghost danger" (click)="deleteRole(role.id)">Excluir</button>
+            <button type="button" class="ghost danger" *ngIf="role.active === 1" (click)="deactivateRole(role.id)">Desativar</button>
+            <button type="button" class="ghost" *ngIf="role.active === 0" (click)="activateRole(role.id)">Ativar</button>
           </div>
         </article>
       </div>
@@ -73,6 +74,7 @@ import { RoleService } from '../role.service';
     h3 { margin: 0; font-size: 1.08rem; text-transform: capitalize; }
     .card-top p { margin: 6px 0 0; color: var(--muted); font-size: 0.92rem; }
     .badge { background: var(--accent-soft); color: var(--accent); border-radius: 999px; padding: 6px 10px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
+    .badge.inactive { background: rgba(187, 62, 62, 0.1); color: var(--danger); }
     dl { display: grid; gap: 12px; margin: 0 0 16px; }
     dt { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 4px; }
     dd { margin: 0; font-size: 0.94rem; }
@@ -110,17 +112,31 @@ export class RoleListPageComponent {
     });
   }
 
-  protected deleteRole(id: number): void {
+  protected deactivateRole(id: number): void {
     this.errorMessage = '';
     this.successMessage = '';
-    this.roleService.delete(id).subscribe({
+    this.roleService.softDelete(id).subscribe({
       next: () => {
-        this.successMessage = 'Role removida com sucesso.';
+        this.successMessage = 'Role desativada com sucesso.';
         this.loadRoles();
       },
       error: (error) => {
         const apiErrors = error?.error?.errors;
-        this.errorMessage = Array.isArray(apiErrors) ? apiErrors.join(', ') : 'Nao foi possivel remover a role.';
+        this.errorMessage = Array.isArray(apiErrors) ? apiErrors.join(', ') : 'Nao foi possivel desativar a role.';
+      }
+    });
+  }
+
+  protected activateRole(id: number): void {
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.roleService.activate(id).subscribe({
+      next: () => {
+        this.successMessage = 'Role ativada com sucesso.';
+        this.loadRoles();
+      },
+      error: () => {
+        this.errorMessage = 'Nao foi possivel ativar a role.';
       }
     });
   }

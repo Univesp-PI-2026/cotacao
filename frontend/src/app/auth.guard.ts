@@ -15,3 +15,15 @@ export const authGuard: CanActivateFn = (_route, state) => {
     queryParams: { redirectTo: state.url }
   });
 };
+
+export const adminGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+  const currentUser = authService.currentUser();
+
+  if (authService.hasValidSession() && currentUser?.role_name === 'admin') {
+    return true;
+  }
+
+  return router.createUrlTree(['/dashboard']);
+};
