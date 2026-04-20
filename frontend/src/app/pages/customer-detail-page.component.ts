@@ -37,13 +37,13 @@ import { CustomerService } from '../customer.service';
             <label>
               <span>Nome*</span>
               <input formControlName="name" type="text" />
-              <small class="field-error" *ngIf="showFieldError('name')">{{ getFieldError('name') }}</small>
+              <small class="field-error" [class.visible]="showFieldError('name')">{{ getFieldErrorText('name') }}</small>
             </label>
 
             <label>
               <span>E-mail*</span>
               <input formControlName="email" type="email" />
-              <small class="field-error" *ngIf="showFieldError('email')">{{ getFieldError('email') }}</small>
+              <small class="field-error" [class.visible]="showFieldError('email')">{{ getFieldErrorText('email') }}</small>
             </label>
           </div>
 
@@ -51,7 +51,7 @@ import { CustomerService } from '../customer.service';
             <label>
               <span>Data de nascimento*</span>
               <input formControlName="birth_date" type="date" />
-              <small class="field-error" *ngIf="showFieldError('birth_date')">{{ getFieldError('birth_date') }}</small>
+              <small class="field-error" [class.visible]="showFieldError('birth_date')">{{ getFieldErrorText('birth_date') }}</small>
             </label>
 
             <label>
@@ -65,13 +65,13 @@ import { CustomerService } from '../customer.service';
             <label *ngIf="!form.value.is_foreign">
               <span>CPF*</span>
               <input formControlName="cpf" type="text" />
-              <small class="field-error" *ngIf="showFieldError('cpf')">{{ getFieldError('cpf') }}</small>
+              <small class="field-error" [class.visible]="showFieldError('cpf')">{{ getFieldErrorText('cpf') }}</small>
             </label>
 
             <label *ngIf="form.value.is_foreign">
               <span>RNM*</span>
               <input formControlName="rnm" type="text" />
-              <small class="field-error" *ngIf="showFieldError('rnm')">{{ getFieldError('rnm') }}</small>
+              <small class="field-error" [class.visible]="showFieldError('rnm')">{{ getFieldErrorText('rnm') }}</small>
             </label>
           </div>
         </article>
@@ -84,20 +84,23 @@ import { CustomerService } from '../customer.service';
           <div class="grid three">
             <label>
               <span>CEP*</span>
-              <input formControlName="zip_code" type="text" />
-              <small class="field-error" *ngIf="showFieldError('zip_code')">{{ getFieldError('zip_code') }}</small>
+              <input formControlName="zip_code" type="text" (blur)="lookupZipCode()" />
+              <small class="field-error" [class.visible]="showFieldError('zip_code')">{{ getFieldErrorText('zip_code') }}</small>
+              <small class="field-hint" [class.visible]="zipLookupLoading || !!zipLookupMessage" [class.error]="zipLookupError">
+                {{ getZipLookupText() }}
+              </small>
             </label>
 
             <label>
               <span>Rua*</span>
               <input formControlName="street" type="text" />
-              <small class="field-error" *ngIf="showFieldError('street')">{{ getFieldError('street') }}</small>
+              <small class="field-error" [class.visible]="showFieldError('street')">{{ getFieldErrorText('street') }}</small>
             </label>
 
             <label>
               <span>Número*</span>
               <input formControlName="number" type="text" />
-              <small class="field-error" *ngIf="showFieldError('number')">{{ getFieldError('number') }}</small>
+              <small class="field-error" [class.visible]="showFieldError('number')">{{ getFieldErrorText('number') }}</small>
             </label>
           </div>
 
@@ -110,13 +113,13 @@ import { CustomerService } from '../customer.service';
             <label>
               <span>Bairro*</span>
               <input formControlName="district" type="text" />
-              <small class="field-error" *ngIf="showFieldError('district')">{{ getFieldError('district') }}</small>
+              <small class="field-error" [class.visible]="showFieldError('district')">{{ getFieldErrorText('district') }}</small>
             </label>
 
             <label>
               <span>Cidade*</span>
               <input formControlName="city" type="text" />
-              <small class="field-error" *ngIf="showFieldError('city')">{{ getFieldError('city') }}</small>
+              <small class="field-error" [class.visible]="showFieldError('city')">{{ getFieldErrorText('city') }}</small>
             </label>
           </div>
 
@@ -124,7 +127,7 @@ import { CustomerService } from '../customer.service';
             <label>
               <span>Estado*</span>
               <input formControlName="state" type="text" maxlength="2" />
-              <small class="field-error" *ngIf="showFieldError('state')">{{ getFieldError('state') }}</small>
+              <small class="field-error" [class.visible]="showFieldError('state')">{{ getFieldErrorText('state') }}</small>
             </label>
 
             <label class="toggle">
@@ -203,7 +206,29 @@ import { CustomerService } from '../customer.service';
       color: #2f3650;
       background: #fff;
     }
-    .field-error { color: #c44646; font-size: 0.72rem; }
+    .field-error {
+      display: block;
+      min-height: 1rem;
+      color: #c44646;
+      font-size: 0.72rem;
+      visibility: hidden;
+    }
+    .field-error.visible {
+      visibility: visible;
+    }
+    .field-hint {
+      display: block;
+      min-height: 1rem;
+      color: #65708d;
+      font-size: 0.68rem;
+      visibility: hidden;
+    }
+    .field-hint.visible {
+      visibility: visible;
+    }
+    .field-hint.error {
+      color: #c44646;
+    }
     .form-footer {
       display: flex;
       justify-content: space-between;
@@ -261,6 +286,10 @@ export class CustomerDetailPageComponent {
   protected errorMessage = '';
   protected loadedCustomer: Customer | null = null;
   protected serverFieldErrors: Partial<Record<keyof typeof this.form.controls, string>> = {};
+  protected zipLookupLoading = false;
+  protected zipLookupMessage = '';
+  protected zipLookupError = false;
+  private lastLookupZipCode = '';
 
   protected readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required]],
@@ -292,6 +321,12 @@ export class CustomerDetailPageComponent {
       if (Object.keys(this.serverFieldErrors).length > 0) {
         this.serverFieldErrors = {};
       }
+    });
+
+    this.form.controls.zip_code.valueChanges.subscribe(() => {
+      this.zipLookupMessage = '';
+      this.zipLookupError = false;
+      this.lastLookupZipCode = '';
     });
 
     const id = this.route.snapshot.paramMap.get('id');
@@ -462,6 +497,52 @@ export class CustomerDetailPageComponent {
     }
 
     return 'Campo invalido.';
+  }
+
+  protected getFieldErrorText(fieldName: keyof typeof this.form.controls): string {
+    return this.showFieldError(fieldName) ? this.getFieldError(fieldName) : '\u00A0';
+  }
+
+  protected getZipLookupText(): string {
+    if (this.zipLookupLoading) {
+      return 'Buscando endereço pelo CEP...';
+    }
+
+    return this.zipLookupMessage || '\u00A0';
+  }
+
+  protected lookupZipCode(): void {
+    const zipCode = String(this.form.controls.zip_code.value || '').replace(/\D/g, '');
+
+    if (zipCode.length !== 8 || zipCode === this.lastLookupZipCode) {
+      return;
+    }
+
+    this.zipLookupLoading = true;
+    this.zipLookupMessage = '';
+    this.zipLookupError = false;
+
+    this.customerService.lookupZipCode(zipCode).subscribe({
+      next: (response) => {
+        this.zipLookupLoading = false;
+
+        this.lastLookupZipCode = zipCode;
+        this.form.patchValue({
+          street: response.street || this.form.controls.street.value,
+          district: response.district || this.form.controls.district.value,
+          city: response.city || this.form.controls.city.value,
+          state: (response.state || this.form.controls.state.value).toUpperCase(),
+          complement: response.complement || this.form.controls.complement.value
+        });
+
+        this.zipLookupMessage = 'Endereço preenchido automaticamente.';
+      },
+      error: () => {
+        this.zipLookupLoading = false;
+        this.zipLookupError = true;
+        this.zipLookupMessage = 'Não foi possível consultar o CEP agora.';
+      }
+    });
   }
 
   private updateDocumentValidators(isForeign: boolean): void {
