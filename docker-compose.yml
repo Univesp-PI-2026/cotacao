@@ -6,17 +6,17 @@ services:
     ports:
       - "${FRONTEND_PORT:-4200}:80"
     depends_on:
-      api:
+      backend:
         condition: service_started
     networks:
       - cotacao-network
 
-  api:
+  backend:
     build:
-      context: ./api
-    container_name: ${CONTAINER_PREFIX:-cotacao-v02}-${APP_ENV:-dev}-api
+      context: ./backend
+    container_name: ${CONTAINER_PREFIX:-cotacao-v02}-${APP_ENV:-dev}-backend
     ports:
-      - "${API_PORT:-3000}:3000"
+      - "${BACKEND_PORT:-3000}:3000"
     environment:
       APP_ENV: ${APP_ENV:-dev}
       NODE_ENV: ${NODE_ENV:-development}
@@ -27,7 +27,7 @@ services:
       DB_USER: ${DB_USER:-cotacao_user}
       DB_PASSWORD: ${DB_PASSWORD:-cotacao_pass}
     volumes:
-      - ./api:/usr/src/app
+      - ./backend:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
       db:
@@ -83,7 +83,7 @@ services:
 
   myadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: ${CONTAINER_PREFIX:-cotacao-v02}-${APP_ENV:-dev}-phpmyadmin
+    container_name: ${CONTAINER_PREFIX:-cotacao-v02}-${APP_ENV:-dev}-myadmin
     restart: unless-stopped
     ports:
       - "${PHPMYADMIN_PORT:-8081}:80"

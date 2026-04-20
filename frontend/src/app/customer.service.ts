@@ -13,6 +13,15 @@ type CountResponse = {
   total: number;
 };
 
+type ViaCepResponse = {
+  zip_code: string;
+  street: string;
+  complement: string;
+  district: string;
+  city: string;
+  state: string;
+};
+
 @Injectable({ providedIn: 'root' })
 export class CustomerService {
   private readonly http = inject(HttpClient);
@@ -46,5 +55,10 @@ export class CustomerService {
 
   activate(id: number) {
     return this.http.patch<{ message: string }>(`${this.apiUrl}/${id}/activate`, {});
+  }
+
+  lookupZipCode(zipCode: string) {
+    const normalizedZipCode = String(zipCode || '').replace(/\D/g, '');
+    return this.http.get<ViaCepResponse>(`/api/v1/zip-codes/${normalizedZipCode}`);
   }
 }

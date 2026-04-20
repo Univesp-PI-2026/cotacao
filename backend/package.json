@@ -1,0 +1,25 @@
+{
+  "name": "cotacao-v02-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API Node.js da reescrita do sistema de cotacao",
+  "main": "src/app.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "test": "node --test test/*.test.js test/**/*.test.js",
+    "test:cov": "node --experimental-test-coverage --test test/*.test.js test/**/*.test.js",
+    "test:services": "node --test test/services/*.test.js"
+  },
+  "dependencies": {
+    "argon2": "^0.41.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.14.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { Customer } from '../customer.model';
@@ -30,85 +30,149 @@ import { QuotationService } from '../quotation.service';
       </article>
 
       <form [formGroup]="form" (ngSubmit)="saveQuotation()" class="quotation-grid">
-        <article class="form-card">
+        <article class="form-card form-card--insurance">
           <div class="panel-heading">
             <strong>Informações do Seguro</strong>
           </div>
 
           <label>
             <span>Cliente*</span>
-            <select formControlName="customer_id">
-              <option [ngValue]="null">Selecione um cliente</option>
-              <option *ngFor="let customer of customers" [ngValue]="customer.id">{{ customer.name }}</option>
-            </select>
+            <div class="customer-picker">
+              <input
+                type="text"
+                [class.field-input-invalid]="hasFieldError('customer_id')"
+                [value]="customerSearch"
+                placeholder="Busque por nome, e-mail ou documento"
+                (focus)="openCustomerPicker()"
+                (blur)="closeCustomerPicker()"
+                (input)="onCustomerSearchChange($any($event.target).value)"
+              />
+
+              <div class="customer-results" *ngIf="customerPickerOpen">
+                <button
+                  type="button"
+                  class="customer-option"
+                  *ngFor="let customer of filteredCustomers"
+                  (mousedown)="selectCustomer(customer)"
+                >
+                  <strong>{{ customer.name }}</strong>
+                  <span>{{ customer.email }}</span>
+                  <small>{{ getCustomerDocument(customer) }}</small>
+                </button>
+
+                <div class="customer-empty" *ngIf="filteredCustomers.length === 0">
+                  Nenhum cliente encontrado.
+                </div>
+              </div>
+            </div>
+            <small class="field-error" *ngIf="hasFieldError('customer_id')">{{ getFieldError('customer_id') }}</small>
           </label>
 
           <label>
             <span>Data da Solicitação*</span>
-            <input formControlName="request_date" type="date" />
+            <input formControlName="request_date" type="date" [class.field-input-invalid]="hasFieldError('request_date')" />
           </label>
+          <small class="field-error" *ngIf="hasFieldError('request_date')">{{ getFieldError('request_date') }}</small>
 
           <label>
             <span>Tipo de Seguro*</span>
-            <select formControlName="insurance_type">
+            <select formControlName="insurance_type" [class.field-input-invalid]="hasFieldError('insurance_type')">
               <option [ngValue]="0">Novo Seguro</option>
               <option [ngValue]="1">Renovação</option>
             </select>
           </label>
+          <small class="field-error" *ngIf="hasFieldError('insurance_type')">{{ getFieldError('insurance_type') }}</small>
 
           <label *ngIf="form.value.insurance_type === 1">
             <span>Classe de Bônus</span>
-            <input formControlName="bonus_class" type="text" />
+            <input formControlName="bonus_class" type="text" [class.field-input-invalid]="hasFieldError('bonus_class')" />
+          </label>
+          <small class="field-error" *ngIf="hasFieldError('bonus_class')">{{ getFieldError('bonus_class') }}</small>
+
+          <label *ngIf="form.value.insurance_type === 1">
+            <span>Teve sinistro?</span>
+            <select formControlName="has_claims">
+              <option [ngValue]="false">Não</option>
+              <option [ngValue]="true">Sim</option>
+            </select>
           </label>
         </article>
 
-        <article class="form-card">
+        <article class="form-card form-card--vehicle">
           <div class="panel-heading">
             <strong>Veículo</strong>
           </div>
 
           <div class="grid two">
-            <label><span>Placa*</span><input formControlName="vehicle_plate" type="text" /></label>
-            <label><span>Chassi*</span><input formControlName="vehicle_chassis" type="text" /></label>
+            <label><span>Placa*</span><input formControlName="vehicle_plate" type="text" [class.field-input-invalid]="hasFieldError('vehicle_plate')" /></label>
+            <label><span>Chassi*</span><input formControlName="vehicle_chassis" type="text" [class.field-input-invalid]="hasFieldError('vehicle_chassis')" /></label>
+          </div>
+          <div class="field-grid-errors">
+            <small class="field-error" *ngIf="hasFieldError('vehicle_plate')">{{ getFieldError('vehicle_plate') }}</small>
+            <small class="field-error" *ngIf="hasFieldError('vehicle_chassis')">{{ getFieldError('vehicle_chassis') }}</small>
           </div>
 
           <div class="grid two">
-            <label><span>Marca*</span><input formControlName="vehicle_brand" type="text" /></label>
-            <label><span>Modelo*</span><input formControlName="vehicle_model" type="text" /></label>
+            <label><span>Marca*</span><input formControlName="vehicle_brand" type="text" [class.field-input-invalid]="hasFieldError('vehicle_brand')" /></label>
+            <label><span>Modelo*</span><input formControlName="vehicle_model" type="text" [class.field-input-invalid]="hasFieldError('vehicle_model')" /></label>
+          </div>
+          <div class="field-grid-errors">
+            <small class="field-error" *ngIf="hasFieldError('vehicle_brand')">{{ getFieldError('vehicle_brand') }}</small>
+            <small class="field-error" *ngIf="hasFieldError('vehicle_model')">{{ getFieldError('vehicle_model') }}</small>
           </div>
 
           <div class="grid two">
-            <label><span>Ano de Fabricação*</span><input formControlName="manufacture_year" type="number" /></label>
-            <label><span>CEP de Pernoite*</span><input formControlName="overnight_zipcode" type="text" /></label>
+            <label><span>Ano de Fabricação*</span><input formControlName="manufacture_year" type="number" [class.field-input-invalid]="hasFieldError('manufacture_year')" /></label>
+            <label><span>CEP de Pernoite*</span><input formControlName="overnight_zipcode" type="text" [class.field-input-invalid]="hasFieldError('overnight_zipcode')" /></label>
+          </div>
+          <div class="field-grid-errors">
+            <small class="field-error" *ngIf="hasFieldError('manufacture_year')">{{ getFieldError('manufacture_year') }}</small>
+            <small class="field-error" *ngIf="hasFieldError('overnight_zipcode')">{{ getFieldError('overnight_zipcode') }}</small>
           </div>
         </article>
 
-        <article class="form-card">
+        <article class="form-card form-card--driver">
           <div class="panel-heading">
             <strong>Condutor</strong>
           </div>
 
-          <label><span>Idade do Condutor*</span><input formControlName="driver_age" type="number" /></label>
+          <label><span>Idade do Condutor*</span><input formControlName="driver_age" type="number" [class.field-input-invalid]="hasFieldError('driver_age')" /></label>
+          <small class="field-error" *ngIf="hasFieldError('driver_age')">{{ getFieldError('driver_age') }}</small>
 
-          <label><span>Tempo de Habilitação*</span><input formControlName="license_time" type="text" /></label>
+          <label><span>Tempo de Habilitação*</span><input formControlName="license_time" type="text" [class.field-input-invalid]="hasFieldError('license_time')" /></label>
+          <small class="field-error" *ngIf="hasFieldError('license_time')">{{ getFieldError('license_time') }}</small>
+        </article>
 
-          <label>
-            <span>Tem seguradora preferida?*</span>
-            <select formControlName="has_insurer_preference">
-              <option [ngValue]="false">Não</option>
-              <option [ngValue]="true">Sim</option>
-            </select>
-          </label>
+        <article class="form-card form-card--coverage">
+          <div class="panel-heading">
+            <strong>Cobertura</strong>
+          </div>
 
-          <label *ngIf="form.value.has_insurer_preference">
-            <span>Qual seguradora?</span>
-            <input formControlName="preferred_insurer" type="text" />
-          </label>
+          <p class="section-note">Defina a preferência de seguradora e descreva as coberturas desejadas para a cotação.</p>
 
-          <label>
-            <span>Coberturas desejadas</span>
-            <textarea formControlName="coverages" rows="4"></textarea>
-          </label>
+          <div class="coverage-stack">
+            <label>
+              <span>Tem seguradora preferida?*</span>
+              <select formControlName="has_insurer_preference" [class.field-input-invalid]="hasFieldError('has_insurer_preference')">
+                <option [ngValue]="false">Não</option>
+                <option [ngValue]="true">Sim</option>
+              </select>
+            </label>
+            <small class="field-error" *ngIf="hasFieldError('has_insurer_preference')">{{ getFieldError('has_insurer_preference') }}</small>
+
+            <label *ngIf="form.value.has_insurer_preference">
+              <span>Qual seguradora?</span>
+              <input formControlName="preferred_insurer" type="text" [class.field-input-invalid]="hasFieldError('preferred_insurer')" />
+            </label>
+            <small class="field-error" *ngIf="hasFieldError('preferred_insurer')">{{ getFieldError('preferred_insurer') }}</small>
+          </div>
+
+          <div class="grid two">
+            <label>
+              <span>Coberturas desejadas</span>
+              <textarea formControlName="coverages" rows="4"></textarea>
+            </label>
+          </div>
         </article>
 
         <div class="form-footer">
@@ -166,13 +230,90 @@ import { QuotationService } from '../quotation.service';
     }
     .quotation-grid {
       display: grid;
-      grid-template-columns: 1.15fr 1fr 0.95fr;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 14px;
       align-items: start;
     }
     .form-card { display: grid; gap: 10px; }
+    .form-card--insurance { grid-column: 1; }
+    .form-card--vehicle { grid-column: 2; }
+    .form-card--driver { grid-column: 1; }
+    .form-card--coverage { grid-column: 2; }
     .grid { display: grid; gap: 10px; }
     .two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .coverage-stack {
+      display: grid;
+      gap: 10px;
+      max-width: calc(50% - 5px);
+    }
+    .section-note {
+      margin: -2px 0 4px;
+      color: #7a829d;
+      font-size: 0.68rem;
+      line-height: 1.5;
+    }
+    .customer-picker {
+      position: relative;
+    }
+    .field-grid-errors {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: -6px;
+    }
+    .customer-results {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      z-index: 5;
+      display: grid;
+      gap: 6px;
+      max-height: 240px;
+      overflow-y: auto;
+      padding: 8px;
+      border: 1px solid #d8dcec;
+      border-radius: 6px;
+      background: #fff;
+      box-shadow: 0 12px 24px rgba(21, 28, 74, 0.12);
+    }
+    .customer-option {
+      display: grid;
+      gap: 2px;
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #e7eaf4;
+      border-radius: 6px;
+      background: #f8f9fd;
+      color: #2f3650;
+      text-align: left;
+      cursor: pointer;
+    }
+    .customer-option:hover {
+      border-color: #c8d1f5;
+      background: #eef1ff;
+    }
+    .customer-option span,
+    .customer-option small,
+    .customer-empty {
+      color: #6d7591;
+      font-size: 0.64rem;
+    }
+    .customer-empty {
+      padding: 10px;
+    }
+    .field-input-invalid {
+      border-color: #d84f6a;
+      box-shadow: 0 0 0 3px rgba(216, 79, 106, 0.12);
+      background: #fff8fa;
+    }
+    .field-error {
+      display: block;
+      margin-top: -2px;
+      color: #c44646;
+      font-size: 0.64rem;
+      line-height: 1.4;
+    }
     label { display: grid; gap: 6px; color: #626982; font-size: 0.68rem; }
     input, select, textarea {
       width: 100%;
@@ -218,7 +359,12 @@ import { QuotationService } from '../quotation.service';
     .error { background: rgba(187, 62, 62, 0.1); color: #c44646; }
     @media (max-width: 1024px) {
       .quotation-grid { grid-template-columns: 1fr; }
-      .customer-grid, .two { grid-template-columns: 1fr; }
+      .form-card--insurance,
+      .form-card--vehicle,
+      .form-card--driver,
+      .form-card--coverage { grid-column: auto; }
+      .coverage-stack { max-width: 100%; }
+      .customer-grid, .two, .field-grid-errors { grid-template-columns: 1fr; }
       .form-footer { align-items: start; flex-direction: column; }
     }
   `]
@@ -237,6 +383,8 @@ export class QuotationDetailPageComponent {
   protected saving = false;
   protected successMessage = '';
   protected errorMessage = '';
+  protected customerSearch = '';
+  protected customerPickerOpen = false;
 
   protected readonly form = this.fb.group({
     customer_id: [null as number | null, [Validators.required]],
@@ -267,6 +415,8 @@ export class QuotationDetailPageComponent {
     });
 
     this.form.controls.customer_id.valueChanges.subscribe(() => this.syncSelectedCustomer());
+    this.form.controls.insurance_type.valueChanges.subscribe(() => this.updateConditionalValidators());
+    this.form.controls.has_insurer_preference.valueChanges.subscribe(() => this.updateConditionalValidators());
 
     const quotationId = this.route.snapshot.paramMap.get('id');
     const customerId = this.route.snapshot.queryParamMap.get('customerId');
@@ -279,6 +429,8 @@ export class QuotationDetailPageComponent {
       this.editingId = Number(quotationId);
       this.loadQuotation(this.editingId);
     }
+
+    this.updateConditionalValidators();
   }
 
   protected loadQuotation(id: number): void {
@@ -424,8 +576,131 @@ export class QuotationDetailPageComponent {
     this.syncSelectedCustomer();
   }
 
+  protected get filteredCustomers(): Customer[] {
+    const term = this.normalizeCustomerTerm(this.customerSearch);
+    const baseCustomers = term
+      ? this.customers.filter((customer) => {
+          const haystack = this.normalizeCustomerTerm([
+            customer.name,
+            customer.email,
+            customer.cpf,
+            customer.rnm
+          ].join(' '));
+
+          return haystack.includes(term);
+        })
+      : this.customers;
+
+    return baseCustomers.slice(0, 12);
+  }
+
+  protected openCustomerPicker(): void {
+    this.customerPickerOpen = true;
+  }
+
+  protected closeCustomerPicker(): void {
+    window.setTimeout(() => {
+      this.customerPickerOpen = false;
+      this.form.controls.customer_id.markAsTouched();
+      this.syncSelectedCustomer();
+    }, 120);
+  }
+
+  protected onCustomerSearchChange(value: string): void {
+    this.customerSearch = value;
+    this.customerPickerOpen = true;
+
+    const selectedLabel = this.selectedCustomer ? this.getCustomerLabel(this.selectedCustomer) : '';
+
+    if (!selectedLabel || value !== selectedLabel) {
+      this.form.patchValue({ customer_id: null }, { emitEvent: false });
+      this.selectedCustomer = null;
+    }
+  }
+
+  protected selectCustomer(customer: Customer): void {
+    this.form.patchValue({ customer_id: customer.id });
+    this.selectedCustomer = customer;
+    this.customerSearch = this.getCustomerLabel(customer);
+    this.customerPickerOpen = false;
+  }
+
+  protected getCustomerDocument(customer: Customer): string {
+    return customer.is_foreign ? (customer.rnm ?? '-') : (customer.cpf ?? '-');
+  }
+
+  protected hasFieldError(fieldName: keyof typeof this.form.controls): boolean {
+    const control = this.form.controls[fieldName];
+    return !!control && control.invalid && (control.touched || control.dirty);
+  }
+
+  protected getFieldError(fieldName: keyof typeof this.form.controls): string {
+    const control = this.form.controls[fieldName];
+
+    if (!control?.errors) {
+      return '';
+    }
+
+    if (control.errors['required']) {
+      return this.getRequiredMessage(fieldName);
+    }
+
+    return 'Corrija este campo.';
+  }
+
   private syncSelectedCustomer(): void {
     const customerId = this.form.controls.customer_id.value;
     this.selectedCustomer = this.customers.find((customer) => customer.id === customerId) ?? null;
+    this.customerSearch = this.selectedCustomer ? this.getCustomerLabel(this.selectedCustomer) : '';
+  }
+
+  private updateConditionalValidators(): void {
+    this.setControlValidators(
+      this.form.controls.bonus_class,
+      this.form.controls.insurance_type.value === 1 ? [Validators.required] : []
+    );
+
+    this.setControlValidators(
+      this.form.controls.preferred_insurer,
+      this.form.controls.has_insurer_preference.value ? [Validators.required] : []
+    );
+  }
+
+  private setControlValidators(control: AbstractControl, validators: ValidatorFn[]): void {
+    control.setValidators(validators);
+    control.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private getRequiredMessage(fieldName: keyof typeof this.form.controls): string {
+    const messages: Record<string, string> = {
+      customer_id: 'Selecione um cliente.',
+      request_date: 'Informe a data da solicitação.',
+      insurance_type: 'Selecione o tipo de seguro.',
+      bonus_class: 'Informe a classe de bônus.',
+      vehicle_plate: 'Informe a placa.',
+      vehicle_chassis: 'Informe o chassi.',
+      vehicle_brand: 'Informe a marca.',
+      vehicle_model: 'Informe o modelo.',
+      manufacture_year: 'Informe o ano de fabricação.',
+      overnight_zipcode: 'Informe o CEP de pernoite.',
+      driver_age: 'Informe a idade do condutor.',
+      license_time: 'Informe o tempo de habilitação.',
+      has_insurer_preference: 'Informe se há seguradora preferida.',
+      preferred_insurer: 'Informe a seguradora preferida.'
+    };
+
+    return messages[fieldName] ?? 'Este campo é obrigatório.';
+  }
+
+  private getCustomerLabel(customer: Customer): string {
+    return `${customer.name} • ${customer.email}`;
+  }
+
+  private normalizeCustomerTerm(value: string): string {
+    return String(value || '')
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .toLowerCase()
+      .trim();
   }
 }
