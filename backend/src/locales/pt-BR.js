@@ -48,6 +48,9 @@ module.exports = {
     fetch_failed: "Falha ao buscar usuario",
     create_failed: "Falha ao criar usuario",
     update_failed: "Falha ao atualizar usuario",
+    password_updated: "Senha atualizada",
+    previous_password_required: "Informe a senha anterior para alterar a senha",
+    previous_password_invalid: "A senha anterior informada esta incorreta",
     activate_failed: "Falha ao ativar usuario",
     deactivate_failed: "Falha ao desativar usuario",
     activated_success: "Usuario ativado com sucesso",
@@ -62,6 +65,7 @@ module.exports = {
       email_required: "Email e obrigatorio",
       email_invalid: "Email invalido",
       role_required: "role_id e obrigatorio",
+      previous_password_required: "Senha anterior e obrigatoria",
       password_required: "Senha e obrigatoria",
       password_min_length: "A senha deve ter pelo menos 8 caracteres"
     }

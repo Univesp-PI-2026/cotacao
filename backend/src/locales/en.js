@@ -48,6 +48,9 @@ module.exports = {
     fetch_failed: "Failed to fetch user",
     create_failed: "Failed to create user",
     update_failed: "Failed to update user",
+    password_updated: "Password updated",
+    previous_password_required: "Enter the previous password to change the password",
+    previous_password_invalid: "The previous password is incorrect",
     activate_failed: "Failed to activate user",
     deactivate_failed: "Failed to deactivate user",
     activated_success: "User activated successfully",
@@ -62,6 +65,7 @@ module.exports = {
       email_required: "Email is required",
       email_invalid: "Email must be valid",
       role_required: "role_id is required",
+      previous_password_required: "Previous password is required",
       password_required: "Password is required",
       password_min_length: "Password must have at least 8 characters"
     }

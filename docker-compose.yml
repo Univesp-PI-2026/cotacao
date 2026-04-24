@@ -1,57 +1,82 @@
-services:
-  frontend:
-    build:
-      context: ./frontend
-    container_name: ${CONTAINER_PREFIX:-cotacao-v02}-${APP_ENV:-dev}-frontend
-    ports:
-      - "${FRONTEND_PORT:-4200}:80"
-    depends_on:
-      backend:
-        condition: service_started
-    networks:
-      - cotacao-network
+x-common-env: &common_env
+  APP_ENV: ${APP_ENV:-dev}
+  NODE_ENV: ${NODE_ENV:-development}
 
+  APP_NAME: ${APP_NAME:-quotation}
+  APP_PREFIX: ${APP_PREFIX:-${APP_NAME:-quotation}_${APP_ENV:-dev}}
+
+  BACKEND_PORT: ${BACKEND_PORT:-3000}
+  FRONTEND_PORT: ${FRONTEND_PORT:-4200}
+  DB_PORT: ${DB_PORT:-3306}
+  DB_ADMIN_PORT: ${DB_ADMIN_PORT:-8001}
+
+  DB_HOST: ${DB_HOST:-db}
+  DB_NAME: ${DB_NAME:-${APP_NAME:-quotation}_${APP_ENV:-dev}_db}
+  DB_USER: ${DB_USER:-${APP_NAME:-quotation}_${APP_ENV:-dev}_user}
+  DB_PASSWORD: ${DB_PASSWORD:-${APP_NAME:-quotation}_${APP_ENV:-dev}_pass}
+
+  MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+  MYSQL_DATABASE: ${MYSQL_DATABASE:-${APP_NAME:-quotation}_${APP_ENV:-dev}_db}
+  MYSQL_USER: ${MYSQL_USER:-${APP_NAME:-quotation}_${APP_ENV:-dev}_user}
+  MYSQL_PASSWORD: ${MYSQL_PASSWORD:-${APP_NAME:-quotation}_${APP_ENV:-dev}_pass}
+
+  PMA_HOST: ${PMA_HOST:-db}
+  PMA_PORT: ${PMA_PORT:-3306}
+  PMA_USER: ${PMA_USER:-${APP_NAME:-quotation}_${APP_ENV:-dev}_user}
+  PMA_PASSWORD: ${PMA_PASSWORD:-${APP_NAME:-quotation}_${APP_ENV:-dev}_pass}
+
+  JWT_SECRET: ${JWT_SECRET:-${APP_NAME:-quotation}_${APP_ENV:-dev}_secret}
+  JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-4h}
+
+services:
   backend:
+    image: ${APP_NAME:-quotation}_${APP_ENV:-dev}_backend:latest
     build:
       context: ./backend
-    container_name: ${CONTAINER_PREFIX:-cotacao-v02}-${APP_ENV:-dev}-backend
+      dockerfile: docker/Dockerfile
+    environment:
+      <<: *common_env
+    container_name: ${APP_NAME:-quotation}_${APP_ENV:-dev}_backend
     ports:
       - "${BACKEND_PORT:-3000}:3000"
-    environment:
-      APP_ENV: ${APP_ENV:-dev}
-      NODE_ENV: ${NODE_ENV:-development}
-      PORT: 3000
-      DB_HOST: ${DB_HOST:-db}
-      DB_PORT: ${DB_PORT:-3306}
-      DB_NAME: ${DB_NAME:-cotacao_v02}
-      DB_USER: ${DB_USER:-cotacao_user}
-      DB_PASSWORD: ${DB_PASSWORD:-cotacao_pass}
     volumes:
       - ./backend:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
       db:
         condition: service_healthy
-      migrate:
+      db_migrate:
         condition: service_completed_successfully
     command: npm run dev
     networks:
-      - cotacao-network
+      - network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: docker/Dockerfile
+    environment:
+      <<: *common_env
+    container_name: ${APP_NAME:-quotation}_${APP_ENV:-dev}_frontend
+    ports:
+      - "${FRONTEND_PORT:-4200}:80"
+    depends_on:
+      backend:
+        condition: service_started
+    networks:
+      - network
 
   db:
     image: mysql:8.4
-    container_name: ${CONTAINER_PREFIX:-cotacao-v02}-${APP_ENV:-dev}-db
     restart: unless-stopped
-    ports:
-      - "${MYSQL_PORT:-3307}:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-cotacao_v02}
-      MYSQL_USER: ${MYSQL_USER:-cotacao_user}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-cotacao_pass}
+      <<: *common_env
+    container_name: ${APP_NAME:-quotation}_${APP_ENV:-dev}_db
+    ports:
+      - "${DB_PORT:-3306}:3306"
     volumes:
-      - ./database/mysql/data:/data/mysql
-      - ./database/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+      - ./database/mysql/data:/var/lib/mysql
+      - ./database/docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
       interval: 10s
@@ -59,19 +84,21 @@ services:
       retries: 12
       start_period: 20s
     networks:
-      - cotacao-network
+      - network
 
-  migrate:
+  db_migrate:
     image: flyway/flyway:12.4-alpine
-    container_name: ${CONTAINER_PREFIX:-cotacao-v02}-${APP_ENV:-dev}-migrate
+    environment:
+      <<: *common_env
+    container_name: ${APP_NAME:-quotation}_${APP_ENV:-dev}_db_migrate
     command:
       - -connectRetries=60
       - -baselineOnMigrate=true
       - -validateMigrationNaming=true
       - -locations=filesystem:/flyway/sql/common,filesystem:/flyway/sql/${APP_ENV:-dev}
-      - -url=jdbc:mysql://db:3306/${MYSQL_DATABASE:-cotacao_v02}?useSSL=false&allowPublicKeyRetrieval=true
-      - -user=${MYSQL_USER:-cotacao_user}
-      - -password=${MYSQL_PASSWORD:-cotacao_pass}
+      - -url=jdbc:mysql://db:3306/${MYSQL_DATABASE:-${APP_NAME:-quotation}_${APP_ENV:-dev}_db}?useSSL=false&allowPublicKeyRetrieval=true
+      - -user=${MYSQL_USER:-${APP_NAME:-quotation}_${APP_ENV:-dev}_user}
+      - -password=${MYSQL_PASSWORD:-${APP_NAME:-quotation}_${APP_ENV:-dev}_pass}
       - migrate
     volumes:
       - ./database/migrations:/flyway/sql:ro
@@ -79,25 +106,23 @@ services:
       db:
         condition: service_healthy
     networks:
-      - cotacao-network
+      - network
 
-  myadmin:
+  db_admin:
     image: phpmyadmin/phpmyadmin
-    container_name: ${CONTAINER_PREFIX:-cotacao-v02}-${APP_ENV:-dev}-myadmin
     restart: unless-stopped
-    ports:
-      - "${PHPMYADMIN_PORT:-8081}:80"
     environment:
-      PMA_HOST: db
-      PMA_PORT: 3306
-      PMA_USER: ${MYSQL_USER:-cotacao_user}
-      PMA_PASSWORD: ${MYSQL_PASSWORD:-cotacao_pass}
+      <<: *common_env
+    container_name: ${APP_NAME:-quotation}_${APP_ENV:-dev}_db_admin
+    ports:
+      - "${DB_ADMIN_PORT:-8081}:80"
     depends_on:
       db:
         condition: service_healthy
     networks:
-      - cotacao-network
+      - network
 
 networks:
-  cotacao-network:
+  network:
+    name: ${APP_NAME:-quotation}_${APP_ENV:-dev}_network
     driver: bridge

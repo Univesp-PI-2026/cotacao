@@ -1,0 +1,15 @@
+@if (message()) {
+  <div class="app-alert" [class.app-alert--error]="type() === 'error'"
+                      [class.app-alert--success]="type() === 'success'"
+                      [class.app-alert--warning]="type() === 'warning'"
+                      [class.app-alert--info]="type() === 'info'">
+    <mat-icon>
+      @if (type() === 'error') { error }
+      @else if (type() === 'success') { check_circle }
+      @else if (type() === 'warning') { warning }
+      @else { info }
+    </mat-icon>
+
+    <span>{{ message() }}</span>
+  </div>
+}

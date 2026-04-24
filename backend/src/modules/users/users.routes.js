@@ -3,7 +3,7 @@ const express = require("express");
 const { badRequest, notFound, serverError } = require("../../utils/http");
 const { getRequestLocale, t } = require("../../utils/i18n");
 const userService = require("./users.service");
-const { validateUserPayload } = require("./users.validator");
+const { validateUserPasswordPayload, validateUserPayload } = require("./users.validator");
 
 const router = express.Router();
 
@@ -70,7 +70,7 @@ router.post("/", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
   const locale = getRequestLocale(req);
-  const validation = validateUserPayload(req.body, { requiresPassword: false }, locale);
+  const validation = validateUserPayload(req.body, { requiresPassword: false, allowsPassword: false }, locale);
 
   if (validation.errors) {
     return badRequest(res, validation.errors, locale);
@@ -90,6 +90,50 @@ router.put("/:id", async (req, res) => {
 
     if (error.code === "ER_DUP_ENTRY") {
       return badRequest(res, [t("users.duplicate_user_identity", locale)], locale);
+    }
+
+    return serverError(res, error, "users.update_failed", locale);
+  }
+});
+
+router.patch("/:id/password", async (req, res) => {
+  const locale = getRequestLocale(req);
+  let isAdminActor = String(req.auth?.role_name || "").trim().toLowerCase().includes("admin");
+
+  if (!isAdminActor && req.auth?.sub) {
+    try {
+      const actor = await userService.getUserById(req.auth.sub);
+      isAdminActor = String(actor?.role_name || "").trim().toLowerCase().includes("admin");
+    } catch (_error) {
+      isAdminActor = false;
+    }
+  }
+
+  const validation = validateUserPasswordPayload(
+    req.body,
+    { requiresPreviousPassword: !isAdminActor },
+    locale
+  );
+
+  if (validation.errors) {
+    return badRequest(res, validation.errors, locale);
+  }
+
+  try {
+    await userService.updateUserPassword(
+      req.params.id,
+      validation.data.password,
+      validation.data.previousPassword,
+      req.auth?.role_name
+    );
+    return res.json({ message: t("users.password_updated", locale) });
+  } catch (error) {
+    if (error.statusCode === 404) {
+      return notFound(res, error.message, locale);
+    }
+
+    if (error.statusCode === 400) {
+      return badRequest(res, [t(error.message, locale)], locale);
     }
 
     return serverError(res, error, "users.update_failed", locale);

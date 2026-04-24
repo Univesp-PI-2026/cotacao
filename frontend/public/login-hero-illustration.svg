@@ -1,0 +1,20 @@
+<svg width="320" height="180" viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="26" y1="22" x2="287" y2="162" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EAF3F7"/>
+      <stop offset="1" stop-color="#D6E6EE"/>
+    </linearGradient>
+    <linearGradient id="card" x1="92" y1="48" x2="228" y2="134" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#02324C"/>
+      <stop offset="1" stop-color="#2F5D7A"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="10" width="300" height="160" rx="24" fill="url(#bg)"/>
+  <circle cx="68" cy="54" r="20" fill="#BFD2DD"/>
+  <circle cx="258" cy="126" r="14" fill="#C8DCE7"/>
+  <rect x="82" y="40" width="156" height="96" rx="18" fill="white"/>
+  <rect x="96" y="54" width="128" height="68" rx="14" fill="url(#card)"/>
+  <rect x="146" y="84" width="28" height="20" rx="6" fill="#F4F7F9"/>
+  <path d="M154 84V78C154 72.4772 158.477 68 164 68C169.523 68 174 72.4772 174 78V84" stroke="#F4F7F9" stroke-width="6" stroke-linecap="round"/>
+  <rect x="112" y="144" width="96" height="8" rx="4" fill="#9CB5C4"/>
+</svg>

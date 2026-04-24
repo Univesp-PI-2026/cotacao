@@ -19,6 +19,7 @@ function normalizeBoolean(value) {
 function validateUserPayload(payload, options = {}, locale) {
   const errors = [];
   const requiresPassword = options.requiresPassword !== false;
+  const allowsPassword = options.allowsPassword !== false;
   const normalizedRoleId = Number(payload.role_id);
   const username = String(payload.username || "").trim().toLowerCase();
 
@@ -47,6 +48,7 @@ function validateUserPayload(payload, options = {}, locale) {
   }
 
   if (
+    allowsPassword &&
     payload.password &&
     String(payload.password).trim().length > 0 &&
     String(payload.password).trim().length < 8
@@ -60,7 +62,7 @@ function validateUserPayload(payload, options = {}, locale) {
 
   const normalizedActive = normalizeBoolean(payload.active);
   const password =
-    payload.password && String(payload.password).trim().length > 0
+    allowsPassword && payload.password && String(payload.password).trim().length > 0
       ? String(payload.password)
       : null;
 
@@ -76,6 +78,35 @@ function validateUserPayload(payload, options = {}, locale) {
   };
 }
 
+function validateUserPasswordPayload(payload, options = {}, locale) {
+  const errors = [];
+  const requiresPreviousPassword = options.requiresPreviousPassword !== false;
+  const password = payload && payload.password ? String(payload.password) : "";
+  const previousPassword = payload && payload.previousPassword ? String(payload.previousPassword) : "";
+
+  if (requiresPreviousPassword && !previousPassword.trim()) {
+    errors.push(t("users.validation.previous_password_required", locale));
+  }
+
+  if (!password.trim()) {
+    errors.push(t("users.validation.password_required", locale));
+  } else if (password.trim().length < 8) {
+    errors.push(t("users.validation.password_min_length", locale));
+  }
+
+  if (errors.length > 0) {
+    return { errors };
+  }
+
+  return {
+    data: {
+      previousPassword,
+      password
+    }
+  };
+}
+
 module.exports = {
-  validateUserPayload
+  validateUserPayload,
+  validateUserPasswordPayload
 };

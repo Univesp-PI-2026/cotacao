@@ -76,6 +76,29 @@ async function findById(id) {
   return rows[0] || null;
 }
 
+async function findByIdWithPassword(id) {
+  const [rows] = await pool.query(
+    `SELECT
+      u.id,
+      u.role_id,
+      r.name AS role_name,
+      u.name,
+      u.username,
+      u.email,
+      u.password,
+      u.active,
+      u.created_at,
+      u.updated_at
+    FROM users u
+    LEFT JOIN roles r ON r.id = u.role_id
+    WHERE u.id = ?
+    LIMIT 1`,
+    [id]
+  );
+
+  return rows[0] || null;
+}
+
 async function roleExists(roleId) {
   const [rows] = await pool.query(
     "SELECT id FROM roles WHERE id = ? AND active = 1 LIMIT 1",
@@ -151,14 +174,25 @@ async function updateActiveStatus(id, active) {
   return result.affectedRows;
 }
 
+async function updatePassword(id, passwordHash) {
+  const [result] = await pool.query(
+    "UPDATE users SET password = ? WHERE id = ?",
+    [passwordHash, id]
+  );
+
+  return result.affectedRows;
+}
+
 module.exports = {
   countActiveAdmins,
   count,
   create,
   findAll,
   findById,
+  findByIdWithPassword,
   findRoleById,
   roleExists,
   update,
-  updateActiveStatus
+  updateActiveStatus,
+  updatePassword
 };

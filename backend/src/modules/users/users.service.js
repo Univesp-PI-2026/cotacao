@@ -107,6 +107,38 @@ function createUsersService({
     return repository.findById(id);
   }
 
+  async function updateUserPassword(id, password, previousPassword, actorRoleName) {
+    const existingUser = await repository.findByIdWithPassword(id);
+
+    if (!existingUser) {
+      throw createError("users.not_found", 404);
+    }
+
+    const isAdminActor = String(actorRoleName || "").trim().toLowerCase().includes("admin");
+
+    if (!isAdminActor) {
+      if (!previousPassword || String(previousPassword).trim().length === 0) {
+        throw createError("users.previous_password_required", 400);
+      }
+
+      const validPreviousPassword = await hasher.verifyPassword(
+        String(previousPassword),
+        existingUser.password
+      );
+
+      if (!validPreviousPassword) {
+        throw createError("users.previous_password_invalid", 400);
+      }
+    }
+
+    const passwordHash = await hasher.hashPassword(password);
+    const affectedRows = await repository.updatePassword(id, passwordHash);
+
+    if (affectedRows === 0) {
+      throw createError("users.not_found", 404);
+    }
+  }
+
   async function activateUser(id) {
     const affectedRows = await repository.updateActiveStatus(id, 1);
 
@@ -141,6 +173,7 @@ function createUsersService({
     deactivateUser,
     getUserById,
     listUsers,
+    updateUserPassword,
     updateUser
   };
 }
