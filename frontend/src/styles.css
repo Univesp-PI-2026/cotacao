@@ -5,11 +5,41 @@
   --ink: #1f2a2e;
   --muted: #5d6a6d;
   --line: #d7d1c2;
+  --line-strong: rgba(215, 209, 194, 0.75);
+  --line-soft: rgba(215, 209, 194, 0.7);
   --accent: #0e7c66;
   --accent-soft: #d7efe8;
+  --accent-line: rgba(14, 124, 102, 0.24);
   --danger: #bb3e3e;
   --shadow: 0 20px 60px rgba(31, 42, 46, 0.12);
+  --surface-panel: color-mix(in srgb, var(--paper) 90%, white 10%);
+  --surface-panel-soft: color-mix(in srgb, var(--paper) 88%, white 12%);
+  --surface-soft: rgba(255, 255, 255, 0.7);
+  --surface-soft-strong: rgba(255, 255, 255, 0.72);
+  --surface-base: #fffefb;
+  --font-scale: 1;
   font-family: "Segoe UI", sans-serif;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #10181a;
+  --paper: #162124;
+  --ink: #ecf4f1;
+  --muted: #a9bbb5;
+  --line: #324246;
+  --line-strong: rgba(80, 104, 109, 0.7);
+  --line-soft: rgba(80, 104, 109, 0.56);
+  --accent: #56c8a2;
+  --accent-soft: rgba(86, 200, 162, 0.16);
+  --accent-line: rgba(86, 200, 162, 0.34);
+  --danger: #ff9e9e;
+  --shadow: 0 26px 70px rgba(0, 0, 0, 0.34);
+  --surface-panel: color-mix(in srgb, var(--paper) 92%, black 8%);
+  --surface-panel-soft: color-mix(in srgb, var(--paper) 90%, black 10%);
+  --surface-soft: rgba(22, 33, 36, 0.88);
+  --surface-soft-strong: rgba(24, 37, 40, 0.92);
+  --surface-base: #1a2629;
 }
 
 * {
@@ -20,10 +50,12 @@ html,
 body {
   margin: 0;
   min-height: 100%;
+  font-size: calc(16px * var(--font-scale));
   background:
-    radial-gradient(circle at top left, rgba(14, 124, 102, 0.12), transparent 30%),
-    linear-gradient(180deg, #f8f3e8 0%, var(--bg) 100%);
+    radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 18%, transparent), transparent 30%),
+    linear-gradient(180deg, color-mix(in srgb, var(--paper) 35%, var(--bg) 65%) 0%, var(--bg) 100%);
   color: var(--ink);
+  transition: background 220ms ease, color 220ms ease;
 }
 
 body {

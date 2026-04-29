@@ -101,7 +101,9 @@ router.post("/", async (req, res) => {
     );
 
     if (customerRows.length === 0) {
-      return badRequest(res, ["customer_id does not exist"]);
+      return badRequest(res, [
+        { field: "customer_id", message: "Selecione um cliente valido." }
+      ]);
     }
 
     const [result] = await pool.query(

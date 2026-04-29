@@ -101,7 +101,11 @@ router.post("/", async (req, res) => {
     return res.status(201).json(rows[0]);
   } catch (error) {
     if (error.code === "ER_DUP_ENTRY") {
-      return badRequest(res, ["email, cpf or rnm already exists"]);
+      return badRequest(res, [
+        { field: "email", message: "Ja existe um cliente com este e-mail ou documento." },
+        { field: "cpf", message: "Ja existe um cliente com este e-mail ou documento." },
+        { field: "rnm", message: "Ja existe um cliente com este e-mail ou documento." }
+      ]);
     }
 
     return serverError(res, error, "Falha ao criar cliente");
@@ -156,7 +160,11 @@ router.put("/:id", async (req, res) => {
     return res.json(rows[0]);
   } catch (error) {
     if (error.code === "ER_DUP_ENTRY") {
-      return badRequest(res, ["email, cpf or rnm already exists"]);
+      return badRequest(res, [
+        { field: "email", message: "Ja existe um cliente com este e-mail ou documento." },
+        { field: "cpf", message: "Ja existe um cliente com este e-mail ou documento." },
+        { field: "rnm", message: "Ja existe um cliente com este e-mail ou documento." }
+      ]);
     }
 
     return serverError(res, error, "Falha ao atualizar cliente");

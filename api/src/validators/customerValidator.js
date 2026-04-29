@@ -19,53 +19,55 @@ function validateCustomerPayload(payload) {
   const isForeign = normalizeBoolean(payload.is_foreign);
 
   if (!payload.name || String(payload.name).trim() === "") {
-    errors.push("name is required");
+    errors.push({ field: "name", message: "Nome e obrigatorio." });
   }
 
   if (!payload.email || String(payload.email).trim() === "") {
-    errors.push("email is required");
+    errors.push({ field: "email", message: "E-mail e obrigatorio." });
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(payload.email))) {
-    errors.push("email must be valid");
+    errors.push({ field: "email", message: "Informe um e-mail valido." });
   }
 
   if (isForeign === null) {
-    errors.push("is_foreign must be boolean");
+    errors.push({ field: "is_foreign", message: "Selecione uma opcao valida." });
   }
 
   if (!payload.birth_date) {
-    errors.push("birth_date is required");
+    errors.push({ field: "birth_date", message: "Data de nascimento e obrigatoria." });
   }
 
   if (!payload.zip_code || String(payload.zip_code).trim() === "") {
-    errors.push("zip_code is required");
+    errors.push({ field: "zip_code", message: "CEP e obrigatorio." });
   }
 
   if (!payload.street || String(payload.street).trim() === "") {
-    errors.push("street is required");
+    errors.push({ field: "street", message: "Rua e obrigatoria." });
   }
 
   if (!payload.number || String(payload.number).trim() === "") {
-    errors.push("number is required");
+    errors.push({ field: "number", message: "Numero e obrigatorio." });
   }
 
   if (!payload.district || String(payload.district).trim() === "") {
-    errors.push("district is required");
+    errors.push({ field: "district", message: "Bairro e obrigatorio." });
   }
 
   if (!payload.city || String(payload.city).trim() === "") {
-    errors.push("city is required");
+    errors.push({ field: "city", message: "Cidade e obrigatoria." });
   }
 
   if (!payload.state || String(payload.state).trim() === "") {
-    errors.push("state is required");
+    errors.push({ field: "state", message: "Estado e obrigatorio." });
+  } else if (String(payload.state).trim().length !== 2) {
+    errors.push({ field: "state", message: "Estado deve ter 2 caracteres." });
   }
 
   if (isForeign === false && (!payload.cpf || String(payload.cpf).trim() === "")) {
-    errors.push("cpf is required when is_foreign is false");
+    errors.push({ field: "cpf", message: "CPF e obrigatorio para clientes brasileiros." });
   }
 
   if (isForeign === true && (!payload.rnm || String(payload.rnm).trim() === "")) {
-    errors.push("rnm is required when is_foreign is true");
+    errors.push({ field: "rnm", message: "RNM e obrigatorio para clientes estrangeiros." });
   }
 
   if (errors.length > 0) {

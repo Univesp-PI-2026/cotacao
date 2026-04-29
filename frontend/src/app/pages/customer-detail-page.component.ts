@@ -6,6 +6,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Customer } from '../customer.model';
 import { CustomerService } from '../customer.service';
 
+type CustomerApiError = string | { field?: string; message?: string };
+
 @Component({
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
@@ -124,22 +126,22 @@ import { CustomerService } from '../customer.service';
   `,
   styles: [`
     .detail-layout { display: grid; grid-template-columns: minmax(280px, 340px) 1fr; gap: 24px; align-items: start; }
-    .panel { background: color-mix(in srgb, var(--paper) 90%, white 10%); border: 1px solid rgba(215, 209, 194, 0.75); border-radius: 28px; padding: 24px; box-shadow: var(--shadow); backdrop-filter: blur(10px); }
+    .panel { background: var(--surface-panel); border: 1px solid var(--line-strong); border-radius: 28px; padding: 24px; box-shadow: var(--shadow); backdrop-filter: blur(10px); }
     .eyebrow { margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--accent); font-size: 12px; font-weight: 700; }
     h2 { margin: 0; font-size: 1.6rem; }
     .subtitle { margin: 12px 0 0; color: var(--muted); line-height: 1.5; }
-    .summary { display: grid; gap: 14px; margin: 24px 0; padding: 18px; border-radius: 22px; background: rgba(255, 255, 255, 0.7); border: 1px solid var(--line); }
+    .summary { display: grid; gap: 14px; margin: 24px 0; padding: 18px; border-radius: 22px; background: var(--surface-soft); border: 1px solid var(--line); }
     .label { display: block; color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
     .side-actions, .actions { display: flex; gap: 12px; flex-wrap: wrap; }
     .form { display: grid; gap: 14px; }
     label { display: grid; gap: 8px; color: var(--muted); font-size: 0.92rem; }
-    input, select { width: 100%; border: 1px solid var(--line); border-radius: 16px; padding: 13px 14px; font: inherit; color: var(--ink); background: #fffefb; }
+    input, select { width: 100%; border: 1px solid var(--line); border-radius: 16px; padding: 13px 14px; font: inherit; color: var(--ink); background: var(--surface-base); }
     .field-error { color: var(--danger); font-size: 0.82rem; }
     .toggle { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
     .toggle input { width: 18px; height: 18px; }
     .primary, .ghost { border: 0; border-radius: 999px; padding: 12px 18px; font: inherit; cursor: pointer; transition: transform 180ms ease, background 180ms ease; }
     .primary { background: var(--ink); color: white; box-shadow: var(--shadow); }
-    .ghost { background: rgba(255, 255, 255, 0.7); color: var(--ink); border: 1px solid var(--line); }
+    .ghost { background: var(--surface-soft); color: var(--ink); border: 1px solid var(--line); }
     .link-button { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
     .primary:hover, .ghost:hover { transform: translateY(-1px); }
     .message { margin: 0; padding: 12px 14px; border-radius: 14px; font-size: 0.92rem; }
@@ -271,8 +273,9 @@ export class CustomerDetailPageComponent {
         this.saving = false;
         const apiMessage = error?.error?.message;
         const apiErrors = error?.error?.errors;
-        this.applyApiErrors(Array.isArray(apiErrors) ? apiErrors : []);
-        this.errorMessage = apiMessage || this.buildGenericApiErrorMessage(Array.isArray(apiErrors) ? apiErrors : []);
+        const normalizedApiErrors = Array.isArray(apiErrors) ? apiErrors as CustomerApiError[] : [];
+        this.applyApiErrors(normalizedApiErrors);
+        this.errorMessage = this.buildErrorMessage(apiMessage, normalizedApiErrors);
       }
     });
   }
@@ -389,24 +392,22 @@ export class CustomerDetailPageComponent {
     delete this.serverFieldErrors[fieldName];
   }
 
-  private applyApiErrors(errors: string[]): void {
+  private applyApiErrors(errors: CustomerApiError[]): void {
     this.serverFieldErrors = {};
 
-    errors.forEach((errorMessage) => {
-      const fieldName = this.mapApiErrorToField(errorMessage);
+    errors.forEach((apiError) => {
+      const fieldName = this.mapApiErrorToField(apiError);
       if (!fieldName) {
         return;
       }
 
-      this.serverFieldErrors[fieldName] = this.translateApiError(errorMessage);
+      this.serverFieldErrors[fieldName] = this.translateApiError(apiError);
       this.form.controls[fieldName].markAsTouched();
     });
   }
 
-  private mapApiErrorToField(errorMessage: string): keyof typeof this.form.controls | null {
-    const normalizedError = errorMessage.toLowerCase();
-
-    const fields: Array<keyof typeof this.form.controls> = [
+  private mapApiErrorToField(apiError: CustomerApiError): keyof typeof this.form.controls | null {
+    const fields = new Set<keyof typeof this.form.controls>([
       'name',
       'email',
       'birth_date',
@@ -419,13 +420,23 @@ export class CustomerDetailPageComponent {
       'cpf',
       'rnm',
       'is_foreign'
-    ];
+    ]);
 
-    return fields.find((fieldName) => normalizedError.includes(fieldName)) ?? null;
+    if (typeof apiError !== 'string' && apiError.field && fields.has(apiError.field as keyof typeof this.form.controls)) {
+      return apiError.field as keyof typeof this.form.controls;
+    }
+
+    const normalizedError = this.getApiErrorMessage(apiError).toLowerCase();
+
+    return Array.from(fields).find((fieldName) => normalizedError.includes(fieldName)) ?? null;
   }
 
-  private translateApiError(errorMessage: string): string {
-    const normalizedError = errorMessage.toLowerCase();
+  private translateApiError(apiError: CustomerApiError): string {
+    if (typeof apiError !== 'string' && apiError.message) {
+      return apiError.message;
+    }
+
+    const normalizedError = this.getApiErrorMessage(apiError).toLowerCase();
 
     if (normalizedError === 'email, cpf or rnm already exists') {
       return 'Ja existe um cliente com este e-mail ou documento.';
@@ -446,11 +457,27 @@ export class CustomerDetailPageComponent {
     return 'Campo invalido.';
   }
 
-  private buildGenericApiErrorMessage(errors: string[]): string {
+  private buildErrorMessage(apiMessage: string | undefined, errors: CustomerApiError[]): string {
+    if (Object.keys(this.serverFieldErrors).length > 0) {
+      return 'Verifique os campos destacados.';
+    }
+
+    if (apiMessage && apiMessage !== 'Dados invalidos') {
+      return apiMessage;
+    }
+
+    return this.buildGenericApiErrorMessage(errors);
+  }
+
+  private buildGenericApiErrorMessage(errors: CustomerApiError[]): string {
     if (errors.length === 0) {
       return 'Falha ao salvar cliente.';
     }
 
     return 'Verifique os campos destacados.';
+  }
+
+  private getApiErrorMessage(apiError: CustomerApiError): string {
+    return typeof apiError === 'string' ? apiError : apiError.message ?? '';
   }
 }

@@ -11,8 +11,7 @@ import { AuthService } from '../auth.service';
   template: `
     <section class="login-shell">
       <article class="login-card">
-        <p class="eyebrow">Cotacao V02</p>
-        <h1>Acesso ao painel</h1>
+        <h1>Acesso à aplicação</h1>
         <p class="subtitle">
           Entre com seu usuário para acessar clientes, usuários, roles e cotações.
         </p>
@@ -55,15 +54,15 @@ import { AuthService } from '../auth.service';
   `,
   styles: [`
     .login-shell { min-height: calc(100vh - 64px); display: grid; place-items: center; }
-    .login-card { width: min(100%, 440px); background: color-mix(in srgb, var(--paper) 88%, white 12%); border: 1px solid rgba(215, 209, 194, 0.75); border-radius: 32px; padding: 32px; box-shadow: var(--shadow); backdrop-filter: blur(12px); }
+    .login-card { width: min(100%, 440px); background: var(--surface-panel-soft); border: 1px solid var(--line-strong); border-radius: 32px; padding: 32px; box-shadow: var(--shadow); backdrop-filter: blur(12px); }
     .eyebrow { margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--accent); font-size: 12px; font-weight: 700; }
-    h1 { margin: 0; font-size: clamp(2rem, 4vw, 2.8rem); line-height: 0.95; letter-spacing: -0.04em; }
+    h1 { margin: 0; font-size: clamp(1rem, 2vw, 1.4rem); line-height: 0.95; letter-spacing: -0.04em; }
     .subtitle { margin: 14px 0 24px; color: var(--muted); line-height: 1.5; }
     .form { display: grid; gap: 14px; }
     label { display: grid; gap: 8px; color: var(--muted); font-size: 0.92rem; }
-    input { width: 100%; border: 1px solid var(--line); border-radius: 16px; padding: 13px 14px; font: inherit; color: var(--ink); background: #fffefb; }
+    input { width: 100%; border: 1px solid var(--line); border-radius: 16px; padding: 13px 14px; font: inherit; color: var(--ink); background: var(--surface-base); }
     .password-field { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
-    .password-toggle { border: 1px solid var(--line); border-radius: 999px; padding: 12px 14px; font: inherit; cursor: pointer; background: rgba(255, 255, 255, 0.72); color: var(--ink); transition: transform 180ms ease, background 180ms ease; }
+    .password-toggle { border: 1px solid var(--line); border-radius: 999px; padding: 12px 14px; font: inherit; cursor: pointer; background: var(--surface-soft-strong); color: var(--ink); transition: transform 180ms ease, background 180ms ease; }
     .password-toggle:hover { transform: translateY(-1px); }
     .field-error { color: var(--danger); font-size: 0.82rem; }
     .primary { border: 0; border-radius: 999px; padding: 13px 18px; font: inherit; cursor: pointer; background: var(--ink); color: white; box-shadow: var(--shadow); transition: transform 180ms ease, background 180ms ease; }
@@ -88,7 +87,7 @@ export class LoginPageComponent {
 
   constructor() {
     if (this.authService.isAuthenticated()) {
-      void this.router.navigate(['/customers']);
+      void this.router.navigate(['/dashboard']);
     }
   }
 
@@ -108,7 +107,7 @@ export class LoginPageComponent {
       next: ({ token, user }) => {
         this.submitting = false;
         this.authService.completeLogin(token, user);
-        const redirectTo = this.route.snapshot.queryParamMap.get('redirectTo') || '/customers';
+        const redirectTo = this.route.snapshot.queryParamMap.get('redirectTo') || '/dashboard';
         void this.router.navigateByUrl(redirectTo);
       },
       error: (error) => {

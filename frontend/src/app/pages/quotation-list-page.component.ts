@@ -78,21 +78,21 @@ import { QuotationService } from '../quotation.service';
     </section>
   `,
   styles: [`
-    .panel { background: color-mix(in srgb, var(--paper) 90%, white 10%); border: 1px solid rgba(215, 209, 194, 0.75); border-radius: 28px; padding: 24px; box-shadow: var(--shadow); backdrop-filter: blur(10px); }
+    .panel { background: var(--surface-panel); border: 1px solid var(--line-strong); border-radius: 28px; padding: 24px; box-shadow: var(--shadow); backdrop-filter: blur(10px); }
     .panel-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 20px; }
     h2 { margin: 0; font-size: 1.35rem; }
     .panel-head p { color: var(--muted); margin: 8px 0 0; }
     .primary, .ghost, .status-buttons button { border: 0; border-radius: 999px; padding: 12px 18px; font: inherit; cursor: pointer; transition: transform 180ms ease, background 180ms ease; }
     .primary { background: var(--ink); color: white; box-shadow: var(--shadow); }
-    .ghost, .status-buttons button, select { background: rgba(255, 255, 255, 0.7); color: var(--ink); border: 1px solid var(--line); }
+    .ghost, .status-buttons button, select { background: var(--surface-soft); color: var(--ink); border: 1px solid var(--line); }
     .link-button { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
     .filters { display: grid; grid-template-columns: minmax(220px, 320px) 1fr; gap: 16px; margin-bottom: 20px; }
     label { display: grid; gap: 8px; color: var(--muted); font-size: 0.92rem; }
     select { width: 100%; border-radius: 16px; padding: 13px 14px; font: inherit; }
     .status-buttons { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; }
-    .status-buttons button.active { background: var(--accent-soft); color: var(--accent); border-color: rgba(14, 124, 102, 0.24); }
+    .status-buttons button.active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent-line); }
     .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-    .quotation-card { background: #fffefb; border: 1px solid rgba(215, 209, 194, 0.7); border-radius: 22px; padding: 18px; }
+    .quotation-card { background: var(--surface-base); border: 1px solid var(--line-soft); border-radius: 22px; padding: 18px; }
     .card-top { display: flex; justify-content: space-between; gap: 12px; align-items: start; margin-bottom: 16px; }
     h3 { margin: 0; font-size: 1.08rem; }
     .card-top p { margin: 6px 0 0; color: var(--muted); font-size: 0.92rem; }

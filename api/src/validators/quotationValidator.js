@@ -44,63 +44,63 @@ function validateQuotationPayload(payload) {
   const driverAge = normalizeInteger(payload.driver_age);
 
   if (customerId === null) {
-    errors.push("customer_id is required");
+    errors.push({ field: "customer_id", message: "Selecione um cliente." });
   }
 
   if (!payload.request_date) {
-    errors.push("request_date is required");
+    errors.push({ field: "request_date", message: "Data da solicitacao e obrigatoria." });
   }
 
   if (insuranceType !== 0 && insuranceType !== 1) {
-    errors.push("insurance_type must be 0 or 1");
+    errors.push({ field: "insurance_type", message: "Selecione um tipo de seguro valido." });
   }
 
   if (insuranceType === 1 && (!payload.bonus_class || String(payload.bonus_class).trim() === "")) {
-    errors.push("bonus_class is required for renewal");
+    errors.push({ field: "bonus_class", message: "Classe de bonus e obrigatoria na renovacao." });
   }
 
   if (insuranceType === 1 && hasClaims === null) {
-    errors.push("has_claims is required for renewal");
+    errors.push({ field: "has_claims", message: "Informe se houve sinistros na renovacao." });
   }
 
   if (!payload.vehicle_plate || String(payload.vehicle_plate).trim() === "") {
-    errors.push("vehicle_plate is required");
+    errors.push({ field: "vehicle_plate", message: "Placa e obrigatoria." });
   }
 
   if (!payload.vehicle_chassis || String(payload.vehicle_chassis).trim() === "") {
-    errors.push("vehicle_chassis is required");
+    errors.push({ field: "vehicle_chassis", message: "Chassi e obrigatorio." });
   }
 
   if (!payload.vehicle_brand || String(payload.vehicle_brand).trim() === "") {
-    errors.push("vehicle_brand is required");
+    errors.push({ field: "vehicle_brand", message: "Marca e obrigatoria." });
   }
 
   if (!payload.vehicle_model || String(payload.vehicle_model).trim() === "") {
-    errors.push("vehicle_model is required");
+    errors.push({ field: "vehicle_model", message: "Modelo e obrigatorio." });
   }
 
   if (manufactureYear === null) {
-    errors.push("manufacture_year is required");
+    errors.push({ field: "manufacture_year", message: "Ano e obrigatorio." });
   }
 
   if (!payload.overnight_zipcode || String(payload.overnight_zipcode).trim() === "") {
-    errors.push("overnight_zipcode is required");
+    errors.push({ field: "overnight_zipcode", message: "CEP de pernoite e obrigatorio." });
   }
 
   if (driverAge === null) {
-    errors.push("driver_age is required");
+    errors.push({ field: "driver_age", message: "Idade do condutor e obrigatoria." });
   }
 
   if (!payload.license_time || String(payload.license_time).trim() === "") {
-    errors.push("license_time is required");
+    errors.push({ field: "license_time", message: "Tempo de habilitacao e obrigatorio." });
   }
 
   if (hasInsurerPreference === null) {
-    errors.push("has_insurer_preference must be boolean");
+    errors.push({ field: "has_insurer_preference", message: "Selecione uma opcao valida." });
   }
 
   if (hasInsurerPreference === true && (!payload.preferred_insurer || String(payload.preferred_insurer).trim() === "")) {
-    errors.push("preferred_insurer is required when has_insurer_preference is true");
+    errors.push({ field: "preferred_insurer", message: "Informe a seguradora preferida." });
   }
 
   if (errors.length > 0) {

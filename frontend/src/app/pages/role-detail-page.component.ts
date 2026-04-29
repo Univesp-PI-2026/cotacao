@@ -51,20 +51,20 @@ import { RoleService } from '../role.service';
   `,
   styles: [`
     .detail-layout { display: grid; grid-template-columns: minmax(280px, 340px) 1fr; gap: 24px; align-items: start; }
-    .panel { background: color-mix(in srgb, var(--paper) 90%, white 10%); border: 1px solid rgba(215, 209, 194, 0.75); border-radius: 28px; padding: 24px; box-shadow: var(--shadow); backdrop-filter: blur(10px); }
+    .panel { background: var(--surface-panel); border: 1px solid var(--line-strong); border-radius: 28px; padding: 24px; box-shadow: var(--shadow); backdrop-filter: blur(10px); }
     .eyebrow { margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--accent); font-size: 12px; font-weight: 700; }
     h2 { margin: 0; font-size: 1.6rem; }
     .subtitle { margin: 12px 0 0; color: var(--muted); line-height: 1.5; }
-    .summary { display: grid; gap: 14px; margin: 24px 0; padding: 18px; border-radius: 22px; background: rgba(255, 255, 255, 0.7); border: 1px solid var(--line); }
+    .summary { display: grid; gap: 14px; margin: 24px 0; padding: 18px; border-radius: 22px; background: var(--surface-soft); border: 1px solid var(--line); }
     .label { display: block; color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
     .side-actions, .actions { display: flex; gap: 12px; flex-wrap: wrap; }
     .form { display: grid; gap: 14px; }
     label { display: grid; gap: 8px; color: var(--muted); font-size: 0.92rem; }
-    input { width: 100%; border: 1px solid var(--line); border-radius: 16px; padding: 13px 14px; font: inherit; color: var(--ink); background: #fffefb; }
+    input { width: 100%; border: 1px solid var(--line); border-radius: 16px; padding: 13px 14px; font: inherit; color: var(--ink); background: var(--surface-base); }
     .field-error { color: var(--danger); font-size: 0.82rem; }
     .primary, .ghost { border: 0; border-radius: 999px; padding: 12px 18px; font: inherit; cursor: pointer; transition: transform 180ms ease, background 180ms ease; }
     .primary { background: var(--ink); color: white; box-shadow: var(--shadow); }
-    .ghost { background: rgba(255, 255, 255, 0.7); color: var(--ink); border: 1px solid var(--line); }
+    .ghost { background: var(--surface-soft); color: var(--ink); border: 1px solid var(--line); }
     .ghost.danger { color: var(--danger); }
     .link-button { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
     .primary:hover, .ghost:hover { transform: translateY(-1px); }
