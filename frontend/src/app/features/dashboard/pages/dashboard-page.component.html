@@ -1,0 +1,39 @@
+<section class="dashboard-page">
+  <header class="dashboard-hero">
+    <div class="dashboard-hero__copy">
+      <span class="dashboard-hero__eyebrow">Painel inicial</span>
+      <h1>Ola, {{ firstName() }}.</h1>
+      <p>
+        Organize sua rotina comercial e acompanhe os principais acessos do sistema em um unico lugar.
+      </p>
+    </div>
+  </header>
+
+  <section class="dashboard-shortcuts">
+    <mat-card
+      *ngFor="let shortcut of shortcuts"
+      class="dashboard-shortcut"
+      class="dashboard-shortcut--interactive"
+      [class]="shortcut.accentClass"
+    >
+      <div class="dashboard-shortcut__icon">
+        <mat-icon>{{ shortcut.icon }}</mat-icon>
+      </div>
+
+      <div class="dashboard-shortcut__content">
+        <h2>{{ shortcut.title }}</h2>
+        <p>{{ shortcut.description }}</p>
+      </div>
+
+      <div class="dashboard-shortcut__footer">
+        <a
+          mat-button
+          [routerLink]="shortcut.path"
+        >
+          {{ shortcut.actionLabel }}
+          <mat-icon>arrow_forward</mat-icon>
+        </a>
+      </div>
+    </mat-card>
+  </section>
+</section>

@@ -1,0 +1,96 @@
+
+<div class="layout-page-centered">
+  <mat-card class="surface-card" [style.zoom]="escalaInterface()">
+    <div class="card-header-custom">
+      <div class="card-header-title">
+        Acesso ao sistema
+      </div>
+
+      <div class="card-header-actions">
+        <button class="font-scale-button" mat-mini-fab type="button" (click)="aumentarFonte()">A+</button>
+        <button class="font-scale-button" mat-mini-fab type="button" (click)="diminuirFonte()">a-</button>
+      </div>
+    </div>
+
+    <div class="login-hero-block">
+      <div class="brand-card">
+        <img
+          class="brand-mark brand-mark--lg"
+          src="/logo07-got-transparente.png"
+          alt="Logo Grupo05 Seguros"
+        />
+        <div class="brand-copy">
+          <strong class="brand-name">Grupo05 Seguros</strong>
+        </div>
+      </div>
+    </div>
+
+    <mat-card-content>
+      <div class="feedback-slot">
+        <app-alert [message]="apiErrorMessage()" type="error" />
+      </div>
+
+      <form class="stack-form" [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field
+          appearance="outline"
+          class="form-field-full"
+        >
+          <mat-label>E-mail</mat-label>
+
+          <mat-icon matPrefix>email</mat-icon>
+
+          <input
+            matInput
+            type="email"
+            formControlName="email"
+            placeholder="Digite seu e-mail"
+            autocomplete="email"
+            required
+          />
+          <mat-error *ngIf="form.controls.email.hasError('required')">
+            Informe seu e-mail.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field-full">
+          <mat-label>Senha</mat-label>
+          <mat-icon matPrefix>key</mat-icon>
+          <input
+            matInput
+            [type]="senhaVisivel() ? 'text' : 'password'"
+            formControlName="senha"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="senhaVisivel() ? 'Ocultar senha' : 'Mostrar senha'"
+          >
+            <mat-icon>{{ senhaVisivel() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="form.controls.senha.hasError('required')">
+            Informe sua senha.
+          </mat-error>
+        </mat-form-field>
+
+        <div class="actions-stack">
+          <a class="text-link text-link--center" routerLink="/forgot-password">Esqueci a senha</a>
+          <div class="action-submit-block">
+            <button class="action-button-primary" mat-flat-button color="primary" type="submit" [disabled]="carregando()">
+              <mat-icon *ngIf="!carregando()">login</mat-icon>
+              <mat-spinner *ngIf="carregando()" diameter="18" />
+              <span class="action-button-label" *ngIf="!carregando()">Entrar</span>
+            </button>
+            <div class="action-divider" aria-hidden="true"></div>
+          </div>
+        </div>
+      </form>
+
+      <div class="auth-support-row">
+        <span>Novo usuario?</span>
+        <a class="text-link" routerLink="/sign-up">Cadastre-se</a>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

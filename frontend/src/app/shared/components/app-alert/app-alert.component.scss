@@ -1,0 +1,35 @@
+.app-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  line-height: 1.3;
+  border: 1px solid transparent;
+}
+
+.app-alert--error {
+  background: #fdecea;
+  color: #a63a3a;
+  border-color: #f3c5c5;
+}
+
+.app-alert--success {
+  background: #edf7ef;
+  color: #2f7a4a;
+  border-color: #c7e6d0;
+}
+
+.app-alert--warning {
+  background: #fff8e8;
+  color: #b58a2a;
+  border-color: #f0dfac;
+}
+
+.app-alert--info {
+  background: #eef5ff;
+  color: #2f5d8a;
+  border-color: #c8d9f2;
+}
