@@ -103,7 +103,7 @@ services:
     restart: always
     ports:
       - "80:80"
-      - "81:81"
+      - "8081:81"
       - "443:443"
     volumes:
       - ./data:/data
