@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { HttpErrorResponse } from '@angular/common/http';
 import { LoginComponent } from './login.component';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -9,11 +9,10 @@ describe('LoginComponent', () => {
   let fixture: ComponentFixture<LoginComponent>;
   let component: LoginComponent;
   let authServiceSpy: jasmine.SpyObj<AuthService>;
-  let snackBarSpy: jasmine.SpyObj<MatSnackBar>;
+  let snackBarOpenSpy: jasmine.Spy;
 
   beforeEach(async () => {
     authServiceSpy = jasmine.createSpyObj('AuthService', ['autenticar']);
-    snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
 
     await TestBed.configureTestingModule({
       imports: [LoginComponent],
@@ -21,13 +20,13 @@ describe('LoginComponent', () => {
         provideRouter([]),
         provideAnimationsAsync(),
         { provide: AuthService, useValue: authServiceSpy },
-        { provide: MatSnackBar, useValue: snackBarSpy },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(LoginComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+    snackBarOpenSpy = spyOn((component as any)['snackBar'], 'open');
   });
 
   it('deve ser criado', () => expect(component).toBeTruthy());
@@ -45,13 +44,12 @@ describe('LoginComponent', () => {
   });
 
   it('erro HTTP 401 exibe snackbar com mensagem de credenciais inválidas', async () => {
-    const { HttpErrorResponse } = await import('@angular/common/http');
     authServiceSpy.autenticar.and.rejectWith(
       new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' })
     );
     component.formulario.setValue({ identifier: 'admin', senha: 'wrongpass' });
     await component.entrar();
-    expect(snackBarSpy.open).toHaveBeenCalledWith(
+    expect(snackBarOpenSpy).toHaveBeenCalledWith(
       'Usuário ou senha inválidos.', 'Fechar', jasmine.any(Object)
     );
   });

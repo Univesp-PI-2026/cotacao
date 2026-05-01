@@ -33,8 +33,8 @@ describe('PainelComponent', () => {
 
     fixture = TestBed.createComponent(PainelComponent);
     component = fixture.componentInstance;
-    await fixture.whenStable();
     fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('deve ser criado', () => expect(component).toBeTruthy());

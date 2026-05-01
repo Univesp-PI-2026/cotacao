@@ -82,4 +82,76 @@ describe('CotacaoService', () => {
     req.flush(null);
     await promise;
   });
+
+  it('listar mapeia has_claims=1 para teveSinistro=true e preferred_insurer para seguradoraPreferida', async () => {
+    const promise = service.listar();
+    httpMock.expectOne(url).flush({
+      data: [{
+        ...mockQuotationApi, insurance_type: 1, has_claims: 1, bonus_class: '5',
+        has_insurer_preference: 1, preferred_insurer: 'Porto Seguro',
+      }],
+      total: 1,
+    });
+    const cotacoes = await promise;
+    expect(cotacoes[0].teveSinistro).toBeTrue();
+    expect(cotacoes[0].classeBonus).toBe('5');
+    expect(cotacoes[0].temSeguradoraPreferida).toBeTrue();
+    expect(cotacoes[0].seguradoraPreferida).toBe('Porto Seguro');
+  });
+
+  it('criar envia insurance_type=0 para "novo", coberturas como array e has_claims=1', async () => {
+    const promise = service.criar({
+      clienteId: 1, clienteNome: '', clienteCpf: '', clienteEmail: '',
+      dataSolicitacao: '2025-06-01', tipoSeguro: 'novo',
+      teveSinistro: true, classeBonus: '3',
+      placaVeiculo: 'ABC1234', chassi: '9BW123', marca: 'Toyota', modelo: 'Corolla',
+      anoFabricacao: 2022, cepPernoite: '01310100', idadeCondutor: 39,
+      tempoHabilitacao: '5 a 10 anos', coberturas: 'RCF, CASCO',
+      temSeguradoraPreferida: true, seguradoraPreferida: 'Porto Seguro', ativo: true,
+    });
+    const req = httpMock.expectOne(url);
+    expect(req.request.body['insurance_type']).toBe(0);
+    expect(req.request.body['has_claims']).toBe(1);
+    expect(req.request.body['coverages']).toEqual(['RCF', 'CASCO']);
+    expect(req.request.body['has_insurer_preference']).toBe(1);
+    expect(req.request.body['preferred_insurer']).toBe('Porto Seguro');
+    req.flush({ ...mockQuotationApi, id: 3 });
+    await promise;
+  });
+
+  it('criar envia has_claims=null e bonus_class=null quando teveSinistro e classeBonus ausentes', async () => {
+    const promise = service.criar({
+      clienteId: 1, clienteNome: '', clienteCpf: '', clienteEmail: '',
+      dataSolicitacao: '2025-06-01', tipoSeguro: 'novo',
+      placaVeiculo: 'ABC1234', chassi: '9BW123', marca: 'Toyota', modelo: 'Corolla',
+      anoFabricacao: 2022, cepPernoite: '01310100', idadeCondutor: 39,
+      tempoHabilitacao: '5 a 10 anos', temSeguradoraPreferida: false, ativo: true,
+    });
+    const req = httpMock.expectOne(url);
+    expect(req.request.body['has_claims']).toBeNull();
+    expect(req.request.body['bonus_class']).toBeNull();
+    expect(req.request.body['preferred_insurer']).toBeNull();
+    req.flush({ ...mockQuotationApi, id: 4 });
+    await promise;
+  });
+
+  it('buscarPorId retorna undefined quando HTTP falha', async () => {
+    const promise = service.buscarPorId(999);
+    httpMock.expectOne(`${url}/999`).flush('Error', { status: 404, statusText: 'Not Found' });
+    expect(await promise).toBeUndefined();
+  });
+
+  it('atualizar faz GET + PUT e retorna cotação atualizada', async () => {
+    const promise = service.atualizar(1, { marca: 'Honda' });
+    httpMock.expectOne(`${url}/1`).flush(mockQuotationApi);
+    await new Promise<void>(r => setTimeout(r, 0));
+    httpMock.expectOne(`${url}/1`).flush({ ...mockQuotationApi, vehicle_brand: 'Honda' });
+    expect((await promise).marca).toBe('Honda');
+  });
+
+  it('atualizar lança erro quando cotação não existe', async () => {
+    const promise = service.atualizar(999, { marca: 'Fiat' });
+    httpMock.expectOne(`${url}/999`).flush('Error', { status: 404, statusText: 'Not Found' });
+    await expectAsync(promise).toBeRejectedWithError('Cotação não encontrada');
+  });
 });

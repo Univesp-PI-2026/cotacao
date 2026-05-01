@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
 import { of } from 'rxjs';
 import { ListaClientesComponent } from './lista-clientes.component';
 import { ClienteService } from '../../../core/services/cliente.service';
@@ -20,14 +19,13 @@ describe('ListaClientesComponent', () => {
   let fixture: ComponentFixture<ListaClientesComponent>;
   let component: ListaClientesComponent;
   let clienteServiceSpy: jasmine.SpyObj<ClienteService>;
-  let dialogSpy: jasmine.SpyObj<MatDialog>;
+  let dialogOpenSpy: jasmine.Spy;
+  let snackBarOpenSpy: jasmine.Spy;
 
   beforeEach(async () => {
     clienteServiceSpy = jasmine.createSpyObj('ClienteService', ['listar', 'excluir']);
     clienteServiceSpy.listar.and.resolveTo([mockCliente]);
     clienteServiceSpy.excluir.and.resolveTo();
-
-    dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
 
     await TestBed.configureTestingModule({
       imports: [ListaClientesComponent],
@@ -36,14 +34,16 @@ describe('ListaClientesComponent', () => {
         provideAnimationsAsync(),
         { provide: ClienteService, useValue: clienteServiceSpy },
         { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open']) },
-        { provide: MatDialog, useValue: dialogSpy },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ListaClientesComponent);
     component = fixture.componentInstance;
-    await fixture.whenStable();
     fixture.detectChanges();
+    await fixture.whenStable();
+
+    dialogOpenSpy = spyOn((component as any)['dialog'], 'open');
+    snackBarOpenSpy = spyOn((component as any)['snackBar'], 'open');
   });
 
   it('deve ser criado', () => expect(component).toBeTruthy());
@@ -72,13 +72,13 @@ describe('ListaClientesComponent', () => {
   });
 
   it('confirmarExclusao abre dialog', () => {
-    dialogSpy.open.and.returnValue({ afterClosed: () => of(false) } as any);
+    dialogOpenSpy.and.returnValue({ afterClosed: () => of(false) } as any);
     component.confirmarExclusao(mockCliente);
-    expect(dialogSpy.open).toHaveBeenCalled();
+    expect(dialogOpenSpy).toHaveBeenCalled();
   });
 
   it('confirmarExclusao chama excluir ao confirmar', async () => {
-    dialogSpy.open.and.returnValue({ afterClosed: () => of(true) } as any);
+    dialogOpenSpy.and.returnValue({ afterClosed: () => of(true) } as any);
     component.confirmarExclusao(mockCliente);
     await fixture.whenStable();
     expect(clienteServiceSpy.excluir).toHaveBeenCalledWith(1);

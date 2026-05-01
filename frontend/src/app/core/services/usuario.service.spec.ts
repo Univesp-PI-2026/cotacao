@@ -78,4 +78,34 @@ describe('UsuarioService', () => {
     req.flush(null);
     await promise;
   });
+
+  it('listar mapeia active=0 para ativo=false', async () => {
+    const promise = service.listar();
+    httpMock.expectOne(url).flush({ data: [{ ...mockUserApi, active: 0 }], total: 1 });
+    const usuarios = await promise;
+    expect(usuarios[0].ativo).toBeFalse();
+  });
+
+  it('buscarPorId retorna undefined quando HTTP falha', async () => {
+    const promise = service.buscarPorId(999);
+    httpMock.expectOne(`${url}/999`).flush('Error', { status: 404, statusText: 'Not Found' });
+    expect(await promise).toBeUndefined();
+  });
+
+  it('atualizar faz GET + PUT sem password quando dados não têm senha', async () => {
+    const promise = service.atualizar(1, { nome: 'Novo Nome' });
+    httpMock.expectOne(`${url}/1`).flush(mockUserApi);
+    await new Promise<void>(r => setTimeout(r, 0));
+    const putReq = httpMock.expectOne(`${url}/1`);
+    expect(putReq.request.method).toBe('PUT');
+    expect(putReq.request.body['password']).toBeUndefined();
+    putReq.flush({ ...mockUserApi, name: 'Novo Nome' });
+    expect((await promise).nome).toBe('Novo Nome');
+  });
+
+  it('atualizar lança erro quando usuario não existe', async () => {
+    const promise = service.atualizar(999, { nome: 'X' });
+    httpMock.expectOne(`${url}/999`).flush('Error', { status: 404, statusText: 'Not Found' });
+    await expectAsync(promise).toBeRejectedWithError('Usuário não encontrado');
+  });
 });

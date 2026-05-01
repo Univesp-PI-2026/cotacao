@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { HttpClient, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { AuthService } from './auth.service';
 import { environment } from '../../../environments/environment';
 
@@ -75,5 +75,12 @@ describe('AuthService', () => {
     service.sair();
     expect(service.estaAutenticado()).toBeFalse();
     expect(service.usuarioAtual()).toBeNull();
+  });
+
+  it('carregarUsuarioLocal lê usuário do localStorage quando existe', () => {
+    const u = { id: 2, nome: 'Tiago', username: 'tiago', email: 't@test.com', roleId: 1, ativo: true };
+    localStorage.setItem('g05_usuario', JSON.stringify(u));
+    const s = new AuthService(TestBed.inject(HttpClient), TestBed.inject(Router));
+    expect(s.usuarioAtual()?.nome).toBe('Tiago');
   });
 });

@@ -82,4 +82,55 @@ describe('ClienteService', () => {
     req.flush(null);
     await promise;
   });
+
+  it('mapeia cliente estrangeiro com rnm, active=0 e complement=null', async () => {
+    const promise = service.listar();
+    httpMock.expectOne(url).flush({
+      data: [{ ...mockCustomerApi, is_foreign: 1, cpf: null, rnm: 'RNM12345', active: 0, complement: null }],
+      total: 1,
+    });
+    const clientes = await promise;
+    expect(clientes[0].estrangeiro).toBeTrue();
+    expect(clientes[0].cpf).toBeUndefined();
+    expect(clientes[0].rnm).toBe('RNM12345');
+    expect(clientes[0].ativo).toBeFalse();
+    expect(clientes[0].complemento).toBeUndefined();
+  });
+
+  it('criar estrangeiro envia is_foreign=1, cpf=null, rnm e active=0', async () => {
+    const promise = service.criar({
+      nome: 'John', email: 'john@test.com', estrangeiro: true,
+      rnm: 'RNM99', dataNascimento: '1990-01-01',
+      cep: '20040020', logradouro: 'Rua X', numero: '1',
+      bairro: 'Centro', cidade: 'Rio', estado: 'RJ', ativo: false,
+    });
+    const req = httpMock.expectOne(url);
+    expect(req.request.body['is_foreign']).toBe(1);
+    expect(req.request.body['cpf']).toBeNull();
+    expect(req.request.body['rnm']).toBe('RNM99');
+    expect(req.request.body['complement']).toBeNull();
+    expect(req.request.body['active']).toBe(0);
+    req.flush({ ...mockCustomerApi, id: 3, is_foreign: 1 });
+    await promise;
+  });
+
+  it('buscarPorId retorna undefined quando HTTP falha', async () => {
+    const promise = service.buscarPorId(999);
+    httpMock.expectOne(`${url}/999`).flush('Not Found', { status: 404, statusText: 'Not Found' });
+    expect(await promise).toBeUndefined();
+  });
+
+  it('atualizar faz GET + PUT e retorna cliente atualizado', async () => {
+    const promise = service.atualizar(1, { nome: 'João Atualizado' });
+    httpMock.expectOne(`${url}/1`).flush(mockCustomerApi);
+    await new Promise<void>(r => setTimeout(r, 0));
+    httpMock.expectOne(`${url}/1`).flush({ ...mockCustomerApi, name: 'João Atualizado' });
+    expect((await promise).nome).toBe('João Atualizado');
+  });
+
+  it('atualizar lança erro quando cliente não existe', async () => {
+    const promise = service.atualizar(999, { nome: 'X' });
+    httpMock.expectOne(`${url}/999`).flush('Not Found', { status: 404, statusText: 'Not Found' });
+    await expectAsync(promise).toBeRejectedWithError('Cliente não encontrado');
+  });
 });
