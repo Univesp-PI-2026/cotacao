@@ -40,7 +40,7 @@ export class LoginComponent {
   ) {
     this.formulario = this.fb.group({
       identifier: ['', Validators.required],
-      senha: ['', [Validators.required, Validators.minLength(6)]],
+      senha: ['', Validators.required],
     });
   }
 
