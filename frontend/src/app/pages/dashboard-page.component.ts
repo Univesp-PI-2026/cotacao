@@ -1,160 +1,154 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { catchError, forkJoin, of, type Observable } from 'rxjs';
+import { forkJoin } from 'rxjs';
 
 import { AuthService } from '../auth.service';
 import { CustomerService } from '../customer.service';
 import { QuotationService } from '../quotation.service';
-import { RoleService } from '../role.service';
 import { UserService } from '../user.service';
 
 type DashboardCard = {
   title: string;
-  route: string;
-  icon: string;
-  color: string;
-  description: string;
-  actionLabel: string;
-  total: number | null;
+  value: number;
+  subtitle: string;
+  link: string;
+  linkLabel: string;
+  secondaryLink?: string;
+  secondaryLabel?: string;
+  tone: 'indigo' | 'pink' | 'teal';
 };
 
 @Component({
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <section class="dashboard-shell">
+    <section class="dashboard-page">
       <header class="dashboard-hero">
-        <p class="eyebrow">Menu principal</p>
-        <h2>Olá, {{ firstName() }}.</h2>
-        <p class="subtitle">
-          Acompanhe os módulos principais do sistema e entre direto na área que você precisa.
-        </p>
+        <h2>Olá, {{ firstName }}!</h2>
+        <p>Bem-vindo ao sistema de gestão de seguros.</p>
       </header>
 
-      <p class="message error" *ngIf="loadError">
-        Não foi possível carregar todos os indicadores do painel.
-      </p>
-
-      <section class="cards-grid">
-        <a
-          *ngFor="let card of cards"
-          class="shortcut-card"
-          [routerLink]="card.route"
-        >
-          <div class="card-icon" [style.background]="card.color + '22'">
-            <span class="card-icon-symbol" [style.color]="card.color">{{ card.icon }}</span>
+      <div class="dashboard-grid">
+        <article class="dashboard-card" *ngFor="let card of cards" [class]="'dashboard-card tone-' + card.tone">
+          <div class="card-icon" aria-hidden="true">
+            <svg *ngIf="card.title === 'CLIENTES'" viewBox="0 0 24 24">
+              <path d="M12 12a3.5 3.5 0 1 0-3.5-3.5A3.5 3.5 0 0 0 12 12Z"/>
+              <path d="M5 19a7 7 0 0 1 14 0"/>
+              <path d="M4.5 12.5a2.5 2.5 0 1 0-2.5-2.5 2.5 2.5 0 0 0 2.5 2.5Z"/>
+              <path d="M19.5 12.5A2.5 2.5 0 1 0 17 10a2.5 2.5 0 0 0 2.5 2.5Z"/>
+            </svg>
+            <svg *ngIf="card.title === 'COTAÇÕES'" viewBox="0 0 24 24">
+              <path d="M8 3.5h6l4 4V20a1 1 0 0 1-1 1H8a2 2 0 0 1-2-2V5.5a2 2 0 0 1 2-2Z"/>
+              <path d="M14 3.5v4h4"/>
+              <path d="M9 12h6"/>
+              <path d="M9 15h6"/>
+            </svg>
+            <svg *ngIf="card.title === 'USUÁRIOS'" viewBox="0 0 24 24">
+              <path d="M12 12a3.2 3.2 0 1 0-3.2-3.2A3.2 3.2 0 0 0 12 12Z"/>
+              <path d="M6.5 18.5a5.5 5.5 0 0 1 11 0"/>
+              <path d="M5.5 13.5a2.2 2.2 0 1 0-2.2-2.2 2.2 2.2 0 0 0 2.2 2.2Z"/>
+              <path d="M18.5 13.5a2.2 2.2 0 1 0-2.2-2.2 2.2 2.2 0 0 0 2.2 2.2Z"/>
+            </svg>
           </div>
 
-          <div class="card-content">
-            <p class="card-title">{{ card.title }}</p>
-            <p class="card-total" [style.color]="card.color">
-              {{ card.total === null ? '...' : card.total }}
-            </p>
-            <p class="card-description">{{ card.description }}</p>
+          <p class="card-title">{{ card.title }}</p>
+          <strong class="card-value">{{ card.value }}</strong>
+          <p class="card-subtitle">{{ card.subtitle }}</p>
+          <div class="card-links">
+            <a [routerLink]="card.link" class="card-link">
+              <span aria-hidden="true">➜</span>
+              {{ card.linkLabel }}
+            </a>
+            <a *ngIf="card.secondaryLink && card.secondaryLabel" [routerLink]="card.secondaryLink" class="card-link secondary">
+              <span aria-hidden="true">＋</span>
+              {{ card.secondaryLabel }}
+            </a>
           </div>
-
-          <div class="card-footer">
-            <span class="card-link" [style.color]="card.color">
-              {{ card.actionLabel }}
-            </span>
-          </div>
-        </a>
-      </section>
+        </article>
+      </div>
     </section>
   `,
   styles: [`
-    .dashboard-shell { display: grid; gap: 24px; }
-    .dashboard-hero { display: grid; gap: 8px; }
-    .eyebrow { margin: 0; text-transform: uppercase; letter-spacing: 0.18em; color: var(--accent); font-size: 6px; font-weight: 700; }
-    h2 { margin: 0; font-size: clamp(1rem, 2vw, 1.6rem); line-height: 0.95; letter-spacing: -0.05em; }
-    .subtitle { margin: 0; color: var(--muted); max-width: 62ch; line-height: 1.6; }
-    .cards-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
-    .shortcut-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    .dashboard-page { display: grid; gap: 18px; }
+    .dashboard-hero h2 { margin: 0; font-size: 1.85rem; color: #21263f; }
+    .dashboard-hero p { margin: 6px 0 0; color: #767b91; font-size: 0.96rem; }
+    .dashboard-grid { display: grid; gap: 18px; }
+    .dashboard-card {
+      background: #ffffff;
+      border: 1px solid #e6e8f2;
+      border-radius: 12px;
+      padding: 22px 18px;
+      box-shadow: 0 8px 22px rgba(29, 35, 92, 0.06);
+      display: grid;
+      justify-items: center;
       text-align: center;
-      text-decoration: none;
-      color: inherit;
-      background: var(--surface-panel);
-      border: 1px solid var(--line-strong);
-      border-radius: 28px;
-      padding: 22px;
-      box-shadow: var(--shadow);
-      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
-    }
-    .shortcut-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 26px 70px rgba(31, 42, 46, 0.16);
-      border-color: var(--accent-line);
+      gap: 8px;
     }
     .card-icon {
-      width: 64px;
-      height: 64px;
-      border-radius: 18px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 18px;
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 4px;
     }
-    .card-icon-symbol {
-      font-size: 3.6rem;
-      line-height: 1;
+    .card-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
-    .card-content { display: grid; gap: 4px; justify-items: center; }
+    .tone-indigo .card-icon { background: #eceeff; color: #4b57c5; }
+    .tone-pink .card-icon { background: #ffe9f3; color: #ea4c89; }
+    .tone-teal .card-icon { background: #e4f7f6; color: #1da39b; }
     .card-title {
       margin: 0;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-size: 0.82rem;
-      font-weight: 700;
-    }
-    .card-total {
-      margin: 0;
-      font-size: clamp(2rem, 5vw, 3rem);
+      font-size: 0.78rem;
       font-weight: 800;
+      letter-spacing: 0.08em;
+      color: #626985;
+    }
+    .card-value {
+      font-size: 2.2rem;
       line-height: 1;
+      color: #3341b2;
     }
-    .card-description {
+    .tone-pink .card-value { color: #ea4c89; }
+    .tone-teal .card-value { color: #1da39b; }
+    .card-subtitle {
       margin: 0;
-      color: var(--muted);
-      line-height: 1.5;
-      min-height: 2.8em;
-      max-width: 28ch;
-    }
-    .card-footer {
-      margin-top: 18px;
-      padding-top: 14px;
-      border-top: 1px solid var(--line);
-      width: 100%;
-      display: flex;
-      justify-content: center;
+      color: #8b90a5;
+      font-size: 0.84rem;
     }
     .card-link {
+      margin-top: 4px;
+      color: inherit;
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 700;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      font-weight: 700;
+      gap: 6px;
     }
-    .card-link::after {
-      content: '→';
-      font-size: 1rem;
+    .card-links {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
     }
-    .message.error {
-      margin: 0;
-      padding: 12px 14px;
-      border-radius: 14px;
-      font-size: 0.92rem;
-      background: rgba(187, 62, 62, 0.1);
-      color: var(--danger);
+    .card-link.secondary {
+      opacity: 0.92;
     }
-    @media (min-width: 640px) {
-      .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    }
-    @media (min-width: 1024px) {
-      .cards-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .tone-indigo .card-link { color: #4b57c5; }
+    .tone-pink .card-link { color: #ea4c89; }
+    .tone-teal .card-link { color: #1da39b; }
+    @media (min-width: 900px) {
+      .dashboard-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
   `]
 })
@@ -162,77 +156,79 @@ export class DashboardPageComponent {
   private readonly authService = inject(AuthService);
   private readonly customerService = inject(CustomerService);
   private readonly quotationService = inject(QuotationService);
-  private readonly roleService = inject(RoleService);
   private readonly userService = inject(UserService);
 
-  protected loadError = false;
-  protected readonly firstName = computed(() => {
-    const name = this.authService.currentUser()?.name?.trim() ?? '';
-    return name ? name.split(/\s+/)[0] : 'Usuário';
-  });
-
-  protected readonly cards: DashboardCard[] = [
-    {
-      title: 'Clientes',
-      route: '/customers',
-      icon: '👥',
-      color: '#3366cc',
-      description: 'Cadastros de clientes e consulta rápida da base.',
-      actionLabel: 'Ver lista',
-      total: null
-    },
-    {
-      title: 'Cotações',
-      route: '/quotations',
-      icon: '🧾',
-      color: '#d94f70',
-      description: 'Acompanhe propostas, solicitações e andamento comercial.',
-      actionLabel: 'Ver lista',
-      total: null
-    },
-    {
-      title: 'Usuários',
-      route: '/users',
-      icon: '🛡',
-      color: '#138a72',
-      description: 'Gerencie acessos, perfis e situação dos usuários.',
-      actionLabel: 'Ver lista',
-      total: null
-    },
-    {
-      title: 'Roles',
-      route: '/roles',
-      icon: '⚙',
-      color: '#a06a00',
-      description: 'Organize papéis, permissões e estrutura de acesso.',
-      actionLabel: 'Ver lista',
-      total: null
-    }
-  ];
+  protected firstName = this.authService.currentUser()?.name?.split(' ')[0] || 'Usuário';
+  protected cards: DashboardCard[] = this.buildCards();
 
   constructor() {
-    const withFallback = <T>(stream$: Observable<T>, markError = true) =>
-      stream$.pipe(
-        catchError(() => {
-          if (markError) {
-            this.loadError = true;
-          }
-          return of([] as unknown as T);
-        })
-      );
+    this.loadMetrics();
+  }
+
+  private buildCards(): DashboardCard[] {
+    const cards: DashboardCard[] = [
+      {
+        title: 'CLIENTES',
+        value: 0,
+        subtitle: 'Cadastros de clientes',
+        link: '/customers',
+        linkLabel: 'Ver lista',
+        secondaryLink: '/customers/new',
+        secondaryLabel: 'Novo',
+        tone: 'indigo'
+      },
+      {
+        title: 'COTAÇÕES',
+        value: 0,
+        subtitle: 'Cotações de seguro',
+        link: '/quotations',
+        linkLabel: 'Ver lista',
+        tone: 'pink'
+      }
+    ];
+
+    if (this.authService.currentUser()?.role_name === 'admin') {
+      cards.push({
+        title: 'USUÁRIOS',
+        value: 0,
+        subtitle: 'Usuários do sistema',
+        link: '/users',
+        linkLabel: 'Ver lista',
+        tone: 'teal'
+      });
+    }
+
+    return cards;
+  }
+
+  private loadMetrics(): void {
+    const requests = {
+      customers: this.customerService.list('active'),
+      quotations: this.quotationService.list({ active: 'active', customerId: null }),
+      users: this.authService.currentUser()?.role_name === 'admin'
+        ? this.userService.list({ active: 'active', roleId: null })
+        : null
+    };
 
     forkJoin({
-      customers: withFallback(this.customerService.list('all')),
-      quotations: withFallback(this.quotationService.list({ active: 'all', customerId: null })),
-      users: withFallback(this.userService.list({ active: 'all', roleId: null })),
-      roles: withFallback(this.roleService.list())
+      customers: requests.customers,
+      quotations: requests.quotations,
+      users: requests.users ?? [ ]
     }).subscribe({
-      next: ({ customers, quotations, users, roles }) => {
-        this.cards[0].total = customers.length;
-        this.cards[1].total = quotations.length;
-        this.cards[2].total = users.length;
-        this.cards[3].total = roles.length;
+      next: ({ customers, quotations, users }) => {
+        this.updateCard('CLIENTES', customers.length);
+        this.updateCard('COTAÇÕES', quotations.length);
+
+        if (Array.isArray(users) && this.authService.currentUser()?.role_name === 'admin') {
+          this.updateCard('USUÁRIOS', users.length);
+        }
       }
     });
+  }
+
+  private updateCard(title: DashboardCard['title'], value: number): void {
+    this.cards = this.cards.map((card) =>
+      card.title === title ? { ...card, value } : card
+    );
   }
 }
