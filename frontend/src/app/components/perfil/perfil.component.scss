@@ -1,0 +1,62 @@
+.grid-perfil {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+
+  @media (min-width: 900px) {
+    grid-template-columns: repeat(3, 1fr);
+    align-items: start;
+  }
+}
+
+.card-perfil {
+  background: var(--card-bg);
+  border-radius: 12px !important;
+  box-shadow: var(--sombra) !important;
+}
+
+.header-card {
+  padding: 20px 20px 0 !important;
+
+  .icone-header {
+    color: #3949ab;
+    font-size: 2rem;
+    width: 2rem;
+    height: 2rem;
+  }
+}
+
+.form-perfil {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+.acoes-card {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 8px;
+  padding: 0 0 8px !important;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+.card-perigo {
+  border-left: 4px solid #c62828;
+}
+
+.header-perigo .icone-perigo {
+  color: #c62828 !important;
+}
+
+.aviso-perigo {
+  font-size: 0.9rem;
+  color: var(--texto-secundario);
+  line-height: 1.5;
+  margin: 8px 0;
+}

@@ -1,18 +1,13 @@
+# Stage 1: Build
 FROM node:22-alpine AS build
-
-WORKDIR /usr/src/app
-
+WORKDIR /app
 COPY package*.json ./
-RUN npm install
-
+RUN npm ci
 COPY . .
-RUN npm run build
+RUN npm run build -- --configuration=production
 
-FROM nginx:1.27-alpine
-
-COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /usr/src/app/dist/cotacao-v02-frontend/browser /usr/share/nginx/html
-
+# Stage 2: Serve
+FROM nginx:alpine
+COPY --from=build /app/dist/grupo05-seguros/browser /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]

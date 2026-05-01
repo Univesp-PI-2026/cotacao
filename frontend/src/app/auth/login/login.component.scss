@@ -1,0 +1,71 @@
+.card-header {
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 24px 8px;
+  text-align: center;
+}
+
+.logo-auth {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+
+  .logo-icone {
+    font-size: 2.2rem;
+    width: 2.2rem;
+    height: 2.2rem;
+    color: #3949ab;
+  }
+
+  .logo-nome {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #3949ab;
+  }
+}
+
+.form-auth {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+.link-esqueci {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -8px;
+  margin-bottom: 8px;
+
+  .link-texto {
+    font-size: 0.8rem;
+  }
+}
+
+.botao-entrar {
+  width: 100%;
+  height: 48px;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.card-rodape {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 24px 20px;
+  border-top: 1px solid var(--borda);
+
+  span {
+    font-size: 0.9rem;
+    color: var(--texto-secundario);
+  }
+}

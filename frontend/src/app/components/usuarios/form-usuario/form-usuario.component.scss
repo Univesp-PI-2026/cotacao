@@ -1,0 +1,21 @@
+.form-isolado {
+  max-width: 720px;
+}
+
+.form-conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-secao h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  mat-icon {
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+}

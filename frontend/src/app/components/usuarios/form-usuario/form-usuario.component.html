@@ -1,0 +1,90 @@
+<div class="pagina-conteudo">
+  <div class="cabecalho-secao">
+    <h2>{{ editando ? 'Editar Usuário' : 'Novo Usuário' }}</h2>
+  </div>
+
+  <div class="form-secao form-isolado">
+    <h3><mat-icon>manage_accounts</mat-icon> Dados do Usuário</h3>
+
+    <form [formGroup]="formulario" (ngSubmit)="salvar()" class="form-conteudo">
+      <div class="form-linha">
+        <mat-form-field appearance="outline">
+          <mat-label>Nome completo</mat-label>
+          <mat-icon matPrefix>person</mat-icon>
+          <input matInput formControlName="nome" />
+          @if (formulario.get('nome')?.hasError('required') && formulario.get('nome')?.touched) {
+            <mat-error>Nome é obrigatório</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Usuário (login)</mat-label>
+          <mat-icon matPrefix>alternate_email</mat-icon>
+          <input matInput formControlName="username" />
+          @if (formulario.get('username')?.hasError('required') && formulario.get('username')?.touched) {
+            <mat-error>Usuário é obrigatório</mat-error>
+          } @else if (formulario.get('username')?.hasError('minlength')) {
+            <mat-error>Mínimo de 3 caracteres</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="form-linha">
+        <mat-form-field appearance="outline">
+          <mat-label>E-mail</mat-label>
+          <mat-icon matPrefix>email</mat-icon>
+          <input matInput type="email" formControlName="email" />
+          @if (formulario.get('email')?.hasError('email')) {
+            <mat-error>E-mail inválido</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="form-linha">
+        @if (!editando) {
+          <mat-form-field appearance="outline">
+            <mat-label>Senha</mat-label>
+            <mat-icon matPrefix>lock</mat-icon>
+            <input matInput [type]="senhaVisivel ? 'text' : 'password'" formControlName="senha" />
+            <button mat-icon-button matSuffix type="button" (click)="senhaVisivel = !senhaVisivel">
+              <mat-icon>{{ senhaVisivel ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (formulario.get('senha')?.hasError('minlength')) {
+              <mat-error>Mínimo de 6 caracteres</mat-error>
+            }
+          </mat-form-field>
+        }
+
+        <mat-form-field appearance="outline">
+          <mat-label>Perfil de acesso</mat-label>
+          <mat-icon matPrefix>admin_panel_settings</mat-icon>
+          <mat-select formControlName="roleId">
+            @for (role of roles; track role.id) {
+              <mat-option [value]="role.id">{{ role.nome }}</mat-option>
+            }
+          </mat-select>
+          @if (formulario.get('roleId')?.hasError('required') && formulario.get('roleId')?.touched) {
+            <mat-error>Perfil é obrigatório</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="acoes-form">
+        <a mat-stroked-button routerLink="/usuarios">
+          <mat-icon>arrow_back</mat-icon>
+          VOLTAR
+        </a>
+        <button mat-flat-button color="primary" type="submit" [disabled]="carregando">
+          @if (carregando) {
+            <mat-spinner diameter="20" />
+          } @else {
+            <ng-container>
+              <mat-icon>{{ editando ? 'save' : 'person_add' }}</mat-icon>
+              {{ editando ? 'SALVAR' : 'CADASTRAR' }}
+            </ng-container>
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

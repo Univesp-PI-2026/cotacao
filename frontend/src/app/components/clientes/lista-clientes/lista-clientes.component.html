@@ -1,0 +1,86 @@
+<div class="pagina-conteudo">
+  <!-- Cabeçalho -->
+  <div class="cabecalho-secao">
+    <div class="titulo-com-voltar">
+      <a mat-icon-button routerLink="/painel" matTooltip="Voltar ao painel">
+        <mat-icon>arrow_back</mat-icon>
+      </a>
+      <h2>Clientes</h2>
+    </div>
+    <a mat-flat-button color="primary" routerLink="/clientes/novo">
+      <mat-icon>person_add</mat-icon>
+      NOVO CLIENTE
+    </a>
+  </div>
+
+  <!-- Campo de busca -->
+  <mat-form-field appearance="outline" class="campo-busca">
+    <mat-label>Buscar cliente</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
+    <input matInput [(ngModel)]="termoBusca" (ngModelChange)="filtrar()" placeholder="Nome, e-mail ou CPF..." />
+    @if (termoBusca) {
+      <button mat-icon-button matSuffix (click)="termoBusca = ''; filtrar()">
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+  </mat-form-field>
+
+  <!-- Estado de carregamento -->
+  @if (carregando) {
+    <div class="estado-carregando">
+      <mat-spinner diameter="40" />
+    </div>
+  } @else if (clientesFiltrados.length === 0) {
+    <div class="estado-vazio">
+      <mat-icon>people_outline</mat-icon>
+      <p>Nenhum cliente encontrado.</p>
+      @if (!termoBusca) {
+        <a mat-flat-button color="primary" routerLink="/clientes/novo">Cadastrar primeiro cliente</a>
+      }
+    </div>
+  } @else {
+    <!-- Lista de clientes -->
+    <div class="lista">
+      @for (cliente of clientesFiltrados; track cliente.id) {
+        <mat-card class="lista-card">
+          <mat-card-content class="card-conteudo">
+            <div class="card-info">
+              <div class="avatar-cliente">{{ cliente.nome[0].toUpperCase() }}</div>
+              <div class="dados-cliente">
+                <p class="nome-cliente">{{ cliente.nome }}</p>
+                <p class="email-cliente">{{ cliente.email }}</p>
+                @if (cliente.cpf) {
+                  <p class="cpf-cliente">CPF: {{ cliente.cpf }}</p>
+                }
+              </div>
+            </div>
+
+            <div class="card-acoes">
+              <a
+                mat-stroked-button
+                [routerLink]="['/clientes', cliente.id]"
+                matTooltip="Editar cliente"
+              >
+                <mat-icon>edit</mat-icon>
+                Editar
+              </a>
+              <a
+                mat-stroked-button
+                color="primary"
+                [routerLink]="['/cotacoes/nova', cliente.id]"
+                matTooltip="Nova cotação para este cliente"
+              >
+                <mat-icon>add_circle</mat-icon>
+                Nova Cotação
+              </a>
+              <button mat-stroked-button color="warn" (click)="confirmarExclusao(cliente)">
+                <mat-icon>delete</mat-icon>
+                Excluir
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

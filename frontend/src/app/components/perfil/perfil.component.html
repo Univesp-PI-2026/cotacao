@@ -1,0 +1,126 @@
+<div class="pagina-conteudo">
+  <div class="cabecalho-secao">
+    <div class="titulo-com-voltar">
+      <a mat-icon-button routerLink="/painel" matTooltip="Voltar ao painel">
+        <mat-icon>arrow_back</mat-icon>
+      </a>
+      <h2>Meu Perfil</h2>
+    </div>
+  </div>
+
+  <div class="grid-perfil">
+    <!-- ─── Informações do Perfil ────────────────────────────────────────── -->
+    <mat-card class="card-perfil">
+      <mat-card-header class="header-card">
+        <mat-icon mat-card-avatar class="icone-header">account_circle</mat-icon>
+        <mat-card-title>Informações do Perfil</mat-card-title>
+        <mat-card-subtitle>Atualize nome e e-mail da sua conta</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <form [formGroup]="formInfo" (ngSubmit)="salvarInfo()" class="form-perfil">
+          <mat-form-field appearance="outline" class="form-campo-full">
+            <mat-label>Nome</mat-label>
+            <mat-icon matPrefix>person</mat-icon>
+            <input matInput formControlName="nome" />
+            @if (formInfo.get('nome')?.hasError('required') && formInfo.get('nome')?.touched) {
+              <mat-error>Nome é obrigatório</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-campo-full">
+            <mat-label>E-mail</mat-label>
+            <mat-icon matPrefix>email</mat-icon>
+            <input matInput type="email" formControlName="email" />
+            @if (formInfo.get('email')?.hasError('email')) {
+              <mat-error>E-mail inválido</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="acoes-card">
+            <button mat-flat-button color="primary" type="submit" [disabled]="carregandoInfo">
+              <mat-icon>save</mat-icon>
+              SALVAR
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- ─── Alterar Senha ─────────────────────────────────────────────────── -->
+    <mat-card class="card-perfil">
+      <mat-card-header class="header-card">
+        <mat-icon mat-card-avatar class="icone-header">lock</mat-icon>
+        <mat-card-title>Alterar Senha</mat-card-title>
+        <mat-card-subtitle>Use uma senha longa e única para manter seguro</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <form [formGroup]="formSenha" (ngSubmit)="salvarSenha()" class="form-perfil">
+          <mat-form-field appearance="outline" class="form-campo-full">
+            <mat-label>Senha Atual</mat-label>
+            <mat-icon matPrefix>lock_outline</mat-icon>
+            <input matInput [type]="senhaAtualVisivel ? 'text' : 'password'" formControlName="senhaAtual" />
+            <button mat-icon-button matSuffix type="button" (click)="senhaAtualVisivel = !senhaAtualVisivel">
+              <mat-icon>{{ senhaAtualVisivel ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (formSenha.get('senhaAtual')?.hasError('required') && formSenha.get('senhaAtual')?.touched) {
+              <mat-error>Senha atual é obrigatória</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-campo-full">
+            <mat-label>Nova Senha</mat-label>
+            <mat-icon matPrefix>lock_reset</mat-icon>
+            <input matInput [type]="novaSenhaVisivel ? 'text' : 'password'" formControlName="novaSenha" />
+            <button mat-icon-button matSuffix type="button" (click)="novaSenhaVisivel = !novaSenhaVisivel">
+              <mat-icon>{{ novaSenhaVisivel ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (formSenha.get('novaSenha')?.hasError('minlength')) {
+              <mat-error>Mínimo de 8 caracteres</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-campo-full">
+            <mat-label>Confirme a Nova Senha</mat-label>
+            <mat-icon matPrefix>lock_reset</mat-icon>
+            <input matInput type="password" formControlName="confirmacaoSenha" />
+            @if (formSenha.hasError('senhasNaoCoincidem') && formSenha.get('confirmacaoSenha')?.touched) {
+              <mat-error>As senhas não coincidem</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="acoes-card">
+            <button mat-flat-button color="primary" type="submit" [disabled]="carregandoSenha">
+              <mat-icon>save</mat-icon>
+              SALVAR
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- ─── Excluir Conta ─────────────────────────────────────────────────── -->
+    <mat-card class="card-perfil card-perigo">
+      <mat-card-header class="header-card header-perigo">
+        <mat-icon mat-card-avatar class="icone-header icone-perigo">delete_forever</mat-icon>
+        <mat-card-title>Excluir a Conta</mat-card-title>
+        <mat-card-subtitle>Esta ação é permanente e irreversível</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <p class="aviso-perigo">
+          Depois que sua conta for excluída, todos os seus recursos e dados serão removidos
+          permanentemente. Antes de excluir, faça o download de qualquer dado que deseja manter.
+        </p>
+      </mat-card-content>
+
+      <mat-card-actions class="acoes-card">
+        <button mat-flat-button color="warn" (click)="confirmarExclusao()">
+          <mat-icon>delete_forever</mat-icon>
+          EXCLUIR CONTA
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

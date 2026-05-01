@@ -1,0 +1,80 @@
+<mat-sidenav-container class="container-sidenav">
+  <!-- ─── Sidenav ──────────────────────────────────────────────────────────── -->
+  <mat-sidenav
+    #sidenav
+    [mode]="isMobile ? 'over' : 'side'"
+    [opened]="!isMobile"
+    class="sidenav"
+  >
+    <!-- Logo / título no sidenav -->
+    <div class="sidenav-header">
+      <mat-icon class="logo-icon">security</mat-icon>
+      <span class="logo-texto">Grupo05</span>
+    </div>
+
+    <mat-divider />
+
+    <!-- Itens do menu -->
+    <mat-nav-list class="nav-list">
+      @for (item of menuItens; track item.rota) {
+        <a
+          mat-list-item
+          [routerLink]="item.rota"
+          routerLinkActive="item-ativo"
+          (click)="fecharSidenavMobile()"
+        >
+          <mat-icon matListItemIcon>{{ item.icone }}</mat-icon>
+          <span matListItemTitle>{{ item.rotulo }}</span>
+        </a>
+      }
+    </mat-nav-list>
+
+    <mat-divider />
+
+    <!-- Sair -->
+    <mat-nav-list>
+      <a mat-list-item (click)="sair()" class="item-sair">
+        <mat-icon matListItemIcon>logout</mat-icon>
+        <span matListItemTitle>Sair</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <!-- ─── Conteúdo principal ──────────────────────────────────────────────── -->
+  <mat-sidenav-content class="sidenav-content">
+    <!-- Toolbar -->
+    <mat-toolbar color="primary" class="toolbar">
+      <button
+        mat-icon-button
+        (click)="alternarSidenav()"
+        [attr.aria-label]="isMobile ? 'Abrir menu' : 'Fechar menu'"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <span class="toolbar-titulo">Grupo05 Seguros</span>
+
+      <span class="flex-espacador"></span>
+
+      <!-- Toggle tema -->
+      <button
+        mat-icon-button
+        (click)="temaService.alternarTema()"
+        [matTooltip]="temaEscuro() ? 'Modo claro' : 'Modo escuro'"
+        aria-label="Alternar tema"
+      >
+        <mat-icon>{{ temaEscuro() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      </button>
+
+      <!-- Avatar do usuário -->
+      <div class="avatar-usuario" [matTooltip]="usuario()?.nome ?? ''">
+        {{ inicialLetras() }}
+      </div>
+    </mat-toolbar>
+
+    <!-- Área de conteúdo -->
+    <main class="area-conteudo">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

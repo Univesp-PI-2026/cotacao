@@ -1,0 +1,196 @@
+<div class="pagina-conteudo">
+  <div class="cabecalho-secao">
+    <h2>{{ editando ? 'Editar Cotação' : 'Nova Cotação' }}</h2>
+  </div>
+
+  <form [formGroup]="formulario" (ngSubmit)="salvar()">
+    <!-- ─── Seção 1: Dados do Cliente (readonly) ─────────────────────────── -->
+    @if (cliente) {
+      <div class="form-secao info-cliente">
+        <h3><mat-icon>person</mat-icon> Cliente</h3>
+        <div class="form-linha-3">
+          <div class="campo-readonly">
+            <label>Nome</label>
+            <p>{{ cliente.nome }}</p>
+          </div>
+          <div class="campo-readonly">
+            <label>CPF</label>
+            <p>{{ cliente.cpf ?? 'N/A' }}</p>
+          </div>
+          <div class="campo-readonly">
+            <label>E-mail</label>
+            <p>{{ cliente.email }}</p>
+          </div>
+        </div>
+      </div>
+    }
+
+    <div class="secoes-form">
+      <!-- ─── Seção 2: Tipo de Seguro ─────────────────────────────────────── -->
+      <div class="form-secao">
+        <h3><mat-icon>assignment</mat-icon> Informações do Seguro</h3>
+
+        <mat-form-field appearance="outline" class="form-campo-full">
+          <mat-label>Data da Solicitação</mat-label>
+          <input matInput type="date" formControlName="dataSolicitacao" />
+          @if (formulario.get('dataSolicitacao')?.hasError('required') && formulario.get('dataSolicitacao')?.touched) {
+            <mat-error>Data é obrigatória</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-campo-full">
+          <mat-label>Tipo de Seguro</mat-label>
+          <mat-select formControlName="tipoSeguro">
+            <mat-option value="novo">Novo Seguro</mat-option>
+            <mat-option value="renovacao">Renovação de Seguro</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        @if (ehRenovacao) {
+          <mat-form-field appearance="outline" class="form-campo-full">
+            <mat-label>Classe Bônus</mat-label>
+            <input matInput formControlName="classeBonus" placeholder="Ex: 7" />
+            @if (formulario.get('classeBonus')?.hasError('required') && formulario.get('classeBonus')?.touched) {
+              <mat-error>Classe bônus é obrigatória para renovação</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-campo-full">
+            <mat-label>Teve sinistro?</mat-label>
+            <mat-select formControlName="teveSinistro">
+              <mat-option [value]="false">Não</mat-option>
+              <mat-option [value]="true">Sim</mat-option>
+            </mat-select>
+            @if (formulario.get('teveSinistro')?.hasError('required') && formulario.get('teveSinistro')?.touched) {
+              <mat-error>Informe se houve sinistro</mat-error>
+            }
+          </mat-form-field>
+        }
+      </div>
+
+      <!-- ─── Seção 3: Dados do Veículo ───────────────────────────────────── -->
+      <div class="form-secao">
+        <h3><mat-icon>directions_car</mat-icon> Veículo</h3>
+
+        <div class="form-linha">
+          <mat-form-field appearance="outline">
+            <mat-label>Placa</mat-label>
+            <input matInput formControlName="placaVeiculo" placeholder="ABC-1234" maxlength="8" />
+            @if (formulario.get('placaVeiculo')?.hasError('required') && formulario.get('placaVeiculo')?.touched) {
+              <mat-error>Placa é obrigatória</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Chassi</mat-label>
+            <input matInput formControlName="chassi" />
+            @if (formulario.get('chassi')?.hasError('required') && formulario.get('chassi')?.touched) {
+              <mat-error>Chassi é obrigatório</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="form-linha">
+          <mat-form-field appearance="outline">
+            <mat-label>Marca</mat-label>
+            <input matInput formControlName="marca" />
+            @if (formulario.get('marca')?.hasError('required') && formulario.get('marca')?.touched) {
+              <mat-error>Marca é obrigatória</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Modelo</mat-label>
+            <input matInput formControlName="modelo" />
+            @if (formulario.get('modelo')?.hasError('required') && formulario.get('modelo')?.touched) {
+              <mat-error>Modelo é obrigatório</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="form-linha">
+          <mat-form-field appearance="outline">
+            <mat-label>Ano de Fabricação</mat-label>
+            <input matInput type="number" formControlName="anoFabricacao" min="1900" [max]="9999" />
+            @if (formulario.get('anoFabricacao')?.invalid && formulario.get('anoFabricacao')?.touched) {
+              <mat-error>Ano inválido</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>CEP de Pernoite</mat-label>
+            <input matInput formControlName="cepPernoite" placeholder="00000000" maxlength="8" />
+            @if (formulario.get('cepPernoite')?.hasError('pattern') && formulario.get('cepPernoite')?.touched) {
+              <mat-error>CEP deve ter 8 dígitos</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- ─── Seção 4: Condutor ────────────────────────────────────────────── -->
+      <div class="form-secao">
+        <h3><mat-icon>badge</mat-icon> Condutor</h3>
+
+        <mat-form-field appearance="outline" class="form-campo-full">
+          <mat-label>Idade do Condutor</mat-label>
+          <input matInput type="number" formControlName="idadeCondutor" min="18" max="100" />
+          @if (formulario.get('idadeCondutor')?.invalid && formulario.get('idadeCondutor')?.touched) {
+            <mat-error>Idade deve ser entre 18 e 100 anos</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-campo-full">
+          <mat-label>Tempo de Habilitação</mat-label>
+          <mat-select formControlName="tempoHabilitacao">
+            <mat-option value="Menos de 1 ano">Menos de 1 ano</mat-option>
+            <mat-option value="1 a 5 anos">1 a 5 anos</mat-option>
+            <mat-option value="5 a 10 anos">5 a 10 anos</mat-option>
+            <mat-option value="Mais de 10 anos">Mais de 10 anos</mat-option>
+          </mat-select>
+          @if (formulario.get('tempoHabilitacao')?.hasError('required') && formulario.get('tempoHabilitacao')?.touched) {
+            <mat-error>Tempo de habilitação é obrigatório</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- ─── Seguradora Preferida ─────────────────────────────────────── -->
+        <mat-form-field appearance="outline" class="form-campo-full">
+          <mat-label>Tem seguradora preferida?</mat-label>
+          <mat-select formControlName="temSeguradoraPreferida">
+            <mat-option [value]="false">Não</mat-option>
+            <mat-option [value]="true">Sim</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        @if (temSeguradora) {
+          <mat-form-field appearance="outline" class="form-campo-full">
+            <mat-label>Seguradora Preferida</mat-label>
+            <input matInput formControlName="seguradoraPreferida" placeholder="Ex: Porto Seguro" />
+            @if (formulario.get('seguradoraPreferida')?.hasError('required') && formulario.get('seguradoraPreferida')?.touched) {
+              <mat-error>Informe a seguradora preferida</mat-error>
+            }
+          </mat-form-field>
+        }
+
+        <mat-form-field appearance="outline" class="form-campo-full">
+          <mat-label>Coberturas desejadas</mat-label>
+          <textarea matInput formControlName="coberturas" rows="3" placeholder="Descreva as coberturas desejadas (opcional)"></textarea>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Ações -->
+    <div class="acoes-form">
+      <a mat-stroked-button routerLink="/cotacoes">
+        <mat-icon>close</mat-icon>
+        CANCELAR
+      </a>
+      <button mat-flat-button color="primary" type="submit" [disabled]="carregando">
+        @if (carregando) {
+          <mat-spinner diameter="20" />
+        } @else {
+          <ng-container><mat-icon>save</mat-icon> SALVAR COTAÇÃO</ng-container>
+        }
+      </button>
+    </div>
+  </form>
+</div>

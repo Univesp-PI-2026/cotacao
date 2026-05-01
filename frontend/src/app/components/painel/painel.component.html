@@ -1,0 +1,27 @@
+<div class="pagina-conteudo">
+  <div class="saudacao">
+    <h2>Olá, {{ primeiroNome() }}!</h2>
+    <p>Bem-vindo ao sistema de gestão de seguros.</p>
+  </div>
+
+  <div class="grid-cartoes">
+    @for (cartao of cartoes; track cartao.rota) {
+      <mat-card class="cartao-atalho" [routerLink]="cartao.rota">
+        <div class="cartao-icone" [style.background]="cartao.cor + '22'">
+          <mat-icon [style.color]="cartao.cor">{{ cartao.icone }}</mat-icon>
+        </div>
+        <mat-card-content class="cartao-conteudo">
+          <p class="cartao-titulo">{{ cartao.titulo }}</p>
+          <p class="cartao-total" [style.color]="cartao.cor">{{ cartao.total }}</p>
+          <p class="cartao-descricao">{{ cartao.descricao }}</p>
+        </mat-card-content>
+        <mat-card-actions class="cartao-acoes">
+          <button mat-button [style.color]="cartao.cor">
+            Ver lista
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    }
+  </div>
+</div>

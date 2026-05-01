@@ -1,0 +1,260 @@
+@use '@angular/material' as mat;
+
+// ─── Paletas M2 ───────────────────────────────────────────────────────────────
+$primario: mat.m2-define-palette(mat.$m2-indigo-palette);
+$acento:   mat.m2-define-palette(mat.$m2-pink-palette, A200, A100, A400);
+$aviso:    mat.m2-define-palette(mat.$m2-red-palette);
+
+// ─── Temas ────────────────────────────────────────────────────────────────────
+$tema-claro: mat.m2-define-light-theme((
+  color: (
+    primary:  $primario,
+    accent:   $acento,
+    warn:     $aviso,
+  ),
+  typography: mat.m2-define-typography-config(),
+  density: 0,
+));
+
+$tema-escuro: mat.m2-define-dark-theme((
+  color: (
+    primary:  $primario,
+    accent:   $acento,
+    warn:     $aviso,
+  ),
+));
+
+// ─── Aplicar tema claro por padrão ────────────────────────────────────────────
+@include mat.all-component-themes($tema-claro);
+
+// ─── Tema escuro (ativado via classe no body) ─────────────────────────────────
+.tema-escuro {
+  & { color-scheme: dark; }
+  @include mat.all-component-colors($tema-escuro);
+}
+
+// ─── Reset e base ─────────────────────────────────────────────────────────────
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+// ─── Variáveis CSS globais ────────────────────────────────────────────────────
+:root {
+  --pagina-bg: #f4f5f7;
+  --card-bg: #ffffff;
+  --texto-secundario: #5f6368;
+  --borda: #e0e0e0;
+  --sombra: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
+}
+
+.tema-escuro {
+  --pagina-bg: #121212;
+  --card-bg: #1e1e1e;
+  --texto-secundario: #9e9e9e;
+  --borda: #333333;
+  --sombra: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+}
+
+body {
+  background-color: var(--pagina-bg);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+// ─── Layout auth ──────────────────────────────────────────────────────────────
+.layout-auth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 16px;
+  background: linear-gradient(135deg, #3949ab 0%, #1a237e 100%);
+}
+
+.card-auth {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3) !important;
+}
+
+// ─── Página de conteúdo ───────────────────────────────────────────────────────
+.pagina-conteudo {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  @media (min-width: 768px) {
+    padding: 24px;
+  }
+}
+
+// ─── Título com botão voltar ─────────────────────────────────────────────────
+.titulo-com-voltar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  h2 { margin: 0; }
+}
+
+// ─── Cabeçalho de seção ───────────────────────────────────────────────────────
+.cabecalho-secao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+}
+
+// ─── Cards de lista ───────────────────────────────────────────────────────────
+.lista-card {
+  background: var(--card-bg) !important;
+  box-shadow: var(--sombra) !important;
+  border-radius: 8px !important;
+  margin-bottom: 0;
+  transition: box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+  }
+
+  &.inativo {
+    opacity: 0.6;
+  }
+}
+
+// ─── Badge de status ─────────────────────────────────────────────────────────
+.badge-status {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &.ativo {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  &.inativo {
+    background-color: #fce4ec;
+    color: #c62828;
+  }
+}
+
+.tema-escuro .badge-status.ativo {
+  background-color: #1b5e20;
+  color: #a5d6a7;
+}
+
+.tema-escuro .badge-status.inativo {
+  background-color: #4a0e0e;
+  color: #ef9a9a;
+}
+
+// ─── Badge de role ────────────────────────────────────────────────────────────
+.badge-role {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.tema-escuro .badge-role {
+  background-color: #0d2847;
+  color: #90caf9;
+}
+
+// ─── Formulário ──────────────────────────────────────────────────────────────
+.form-secao {
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: var(--sombra);
+  margin-bottom: 16px;
+
+  h3 {
+    margin: 0 0 16px;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #3949ab;
+    border-bottom: 2px solid #3949ab;
+    padding-bottom: 8px;
+  }
+}
+
+.tema-escuro .form-secao h3 {
+  color: #9fa8da;
+  border-bottom-color: #9fa8da;
+}
+
+.form-campo-full {
+  width: 100%;
+}
+
+.form-linha {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0 16px;
+
+  @media (min-width: 600px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.form-linha-3 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px 16px;
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.acoes-form {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+
+  button, a {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+// ─── Snackbars ────────────────────────────────────────────────────────────────
+.snack-sucesso {
+  --mdc-snackbar-container-color: #2e7d32 !important;
+  --mdc-snackbar-supporting-text-color: #ffffff !important;
+}
+
+.snack-erro {
+  --mdc-snackbar-container-color: #c62828 !important;
+  --mdc-snackbar-supporting-text-color: #ffffff !important;
+}
+
+// ─── Campo de busca ───────────────────────────────────────────────────────────
+.campo-busca {
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 16px;
+  display: block;
+}

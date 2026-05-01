@@ -1,0 +1,180 @@
+<div class="pagina-conteudo">
+  <div class="cabecalho-secao">
+    <h2>{{ editando ? 'Editar Cliente' : 'Novo Cliente' }}</h2>
+  </div>
+
+  <form [formGroup]="formulario" (ngSubmit)="salvar()">
+    <div class="secoes-form">
+      <!-- ─── Seção 1: Dados Pessoais ──────────────────────────────────────── -->
+      <div class="form-secao">
+        <h3>
+          <mat-icon>person</mat-icon>
+          Dados Pessoais
+        </h3>
+
+        <div class="form-linha">
+          <mat-form-field appearance="outline">
+            <mat-label>Nome completo</mat-label>
+            <input matInput formControlName="nome" />
+            @if (formulario.get('nome')?.hasError('required') && formulario.get('nome')?.touched) {
+              <mat-error>Nome é obrigatório</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>E-mail</mat-label>
+            <input matInput type="email" formControlName="email" />
+            @if (formulario.get('email')?.hasError('email')) {
+              <mat-error>E-mail inválido</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="form-linha">
+          <mat-form-field appearance="outline">
+            <mat-label>Data de Nascimento</mat-label>
+            <input matInput type="date" formControlName="dataNascimento" />
+            @if (formulario.get('dataNascimento')?.hasError('required') && formulario.get('dataNascimento')?.touched) {
+              <mat-error>Data de nascimento é obrigatória</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Estrangeiro?</mat-label>
+            <mat-select formControlName="estrangeiro">
+              <mat-option [value]="false">Não</mat-option>
+              <mat-option [value]="true">Sim</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        @if (!estrangeiro) {
+          <mat-form-field appearance="outline" class="form-campo-full">
+            <mat-label>CPF</mat-label>
+            <input matInput formControlName="cpf" placeholder="000.000.000-00" />
+            @if (formulario.get('cpf')?.hasError('required') && formulario.get('cpf')?.touched) {
+              <mat-error>CPF é obrigatório</mat-error>
+            }
+          </mat-form-field>
+        }
+
+        @if (estrangeiro) {
+          <mat-form-field appearance="outline" class="form-campo-full">
+            <mat-label>RNM (Registro Nacional Migratório)</mat-label>
+            <input matInput formControlName="rnm" />
+            @if (formulario.get('rnm')?.hasError('required') && formulario.get('rnm')?.touched) {
+              <mat-error>RNM é obrigatório</mat-error>
+            }
+          </mat-form-field>
+        }
+      </div>
+
+      <!-- ─── Seção 2: Endereço ────────────────────────────────────────────── -->
+      <div class="form-secao">
+        <h3>
+          <mat-icon>location_on</mat-icon>
+          Endereço
+        </h3>
+
+        <div class="cep-linha">
+          <mat-form-field appearance="outline" class="campo-cep">
+            <mat-label>CEP</mat-label>
+            <input
+              matInput
+              formControlName="cep"
+              placeholder="00000000"
+              (blur)="buscarCep()"
+              maxlength="8"
+            />
+            @if (buscandoCep) {
+              <mat-spinner matSuffix diameter="18" />
+            }
+            @if (formulario.get('cep')?.hasError('pattern') && formulario.get('cep')?.touched) {
+              <mat-error>CEP deve ter 8 dígitos numéricos</mat-error>
+            }
+          </mat-form-field>
+          <button mat-stroked-button type="button" (click)="buscarCep()" [disabled]="buscandoCep">
+            <mat-icon>search</mat-icon>
+            Buscar
+          </button>
+        </div>
+
+        <div class="form-linha">
+          <mat-form-field appearance="outline">
+            <mat-label>Logradouro</mat-label>
+            <input matInput formControlName="logradouro" />
+            @if (formulario.get('logradouro')?.hasError('required') && formulario.get('logradouro')?.touched) {
+              <mat-error>Logradouro é obrigatório</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Número</mat-label>
+            <input matInput formControlName="numero" />
+            @if (formulario.get('numero')?.hasError('required') && formulario.get('numero')?.touched) {
+              <mat-error>Número é obrigatório</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="form-campo-full">
+          <mat-label>Complemento</mat-label>
+          <input matInput formControlName="complemento" placeholder="Apto, bloco, etc. (opcional)" />
+        </mat-form-field>
+      </div>
+
+      <!-- ─── Seção 3: Complemento do Endereço ────────────────────────────── -->
+      <div class="form-secao">
+        <h3>
+          <mat-icon>map</mat-icon>
+          Localização
+        </h3>
+
+        <div class="form-linha">
+          <mat-form-field appearance="outline">
+            <mat-label>Bairro</mat-label>
+            <input matInput formControlName="bairro" />
+            @if (formulario.get('bairro')?.hasError('required') && formulario.get('bairro')?.touched) {
+              <mat-error>Bairro é obrigatório</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Cidade</mat-label>
+            <input matInput formControlName="cidade" />
+            @if (formulario.get('cidade')?.hasError('required') && formulario.get('cidade')?.touched) {
+              <mat-error>Cidade é obrigatória</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="estado">
+            @for (uf of estados; track uf) {
+              <mat-option [value]="uf">{{ uf }}</mat-option>
+            }
+          </mat-select>
+          @if (formulario.get('estado')?.hasError('required') && formulario.get('estado')?.touched) {
+            <mat-error>Estado é obrigatório</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Ações -->
+    <div class="acoes-form">
+      <a mat-stroked-button routerLink="/clientes">
+        <mat-icon>arrow_back</mat-icon>
+        VOLTAR
+      </a>
+      <button mat-flat-button color="primary" type="submit" [disabled]="carregando">
+        @if (carregando) {
+          <mat-spinner diameter="20" />
+        } @else {
+          <ng-container><mat-icon>{{ editando ? 'save' : 'person_add' }}</mat-icon> {{ editando ? 'SALVAR' : 'INCLUIR' }}</ng-container>
+        }
+      </button>
+    </div>
+  </form>
+</div>

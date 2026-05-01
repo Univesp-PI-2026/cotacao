@@ -1,0 +1,69 @@
+<div class="layout-auth">
+  <mat-card class="card-auth">
+    <mat-card-header class="card-header">
+      <div class="logo-auth">
+        <mat-icon class="logo-icone">security</mat-icon>
+        <h1 class="logo-nome">Grupo05</h1>
+      </div>
+      <mat-card-subtitle>Acesso ao Sistema</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="formulario" (ngSubmit)="entrar()" class="form-auth">
+        <mat-form-field appearance="outline" class="form-campo-full">
+          <mat-label>Usuário ou E-mail</mat-label>
+          <mat-icon matPrefix>person</mat-icon>
+          <input
+            matInput
+            type="text"
+            formControlName="identifier"
+            placeholder="usuário ou email"
+            autocomplete="username"
+          />
+          @if (formulario.get('identifier')?.hasError('required') && formulario.get('identifier')?.touched) {
+            <mat-error>Usuário ou e-mail é obrigatório</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-campo-full">
+          <mat-label>Senha</mat-label>
+          <mat-icon matPrefix>lock</mat-icon>
+          <input
+            matInput
+            [type]="senhaVisivel ? 'text' : 'password'"
+            formControlName="senha"
+            autocomplete="current-password"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="senhaVisivel = !senhaVisivel"
+            [attr.aria-label]="senhaVisivel ? 'Ocultar senha' : 'Mostrar senha'"
+          >
+            <mat-icon>{{ senhaVisivel ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (formulario.get('senha')?.hasError('required') && formulario.get('senha')?.touched) {
+            <mat-error>Senha é obrigatória</mat-error>
+          } @else if (formulario.get('senha')?.hasError('minlength')) {
+            <mat-error>Mínimo de 6 caracteres</mat-error>
+          }
+        </mat-form-field>
+
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          class="botao-entrar"
+          [disabled]="carregando"
+        >
+          @if (carregando) {
+            <mat-spinner diameter="20" />
+          } @else {
+            <ng-container><mat-icon>login</mat-icon> ENTRAR</ng-container>
+          }
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

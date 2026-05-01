@@ -1,34 +1,103 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
+import { guestGuard } from './core/guards/guest.guard';
 
-import { CustomerListPageComponent } from './pages/customer-list-page.component';
-import { CustomerDetailPageComponent } from './pages/customer-detail-page.component';
-import { QuotationListPageComponent } from './pages/quotation-list-page.component';
-import { QuotationDetailPageComponent } from './pages/quotation-detail-page.component';
-import { RoleListPageComponent } from './pages/role-list-page.component';
-import { RoleDetailPageComponent } from './pages/role-detail-page.component';
-import { UserListPageComponent } from './pages/user-list-page.component';
-import { UserDetailPageComponent } from './pages/user-detail-page.component';
-import { LoginPageComponent } from './pages/login-page.component';
-import { DashboardPageComponent } from './pages/dashboard-page.component';
-import { ProfilePageComponent } from './pages/profile-page.component';
-import { adminGuard, authGuard } from './auth.guard';
+export const routes: Routes = [
+  { path: '', redirectTo: '/painel', pathMatch: 'full' },
 
-export const appRoutes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'login' },
-  { path: 'login', component: LoginPageComponent },
-  { path: 'dashboard', component: DashboardPageComponent, canActivate: [authGuard] },
-  { path: 'customers', component: CustomerListPageComponent, canActivate: [authGuard] },
-  { path: 'customers/new', component: CustomerDetailPageComponent, canActivate: [authGuard] },
-  { path: 'customers/:id', component: CustomerDetailPageComponent, canActivate: [authGuard] },
-  { path: 'roles', component: RoleListPageComponent, canActivate: [authGuard] },
-  { path: 'roles/new', component: RoleDetailPageComponent, canActivate: [authGuard] },
-  { path: 'roles/:id', component: RoleDetailPageComponent, canActivate: [authGuard] },
-  { path: 'users', component: UserListPageComponent, canActivate: [authGuard, adminGuard] },
-  { path: 'users/new', component: UserDetailPageComponent, canActivate: [authGuard, adminGuard] },
-  { path: 'users/:id', component: UserDetailPageComponent, canActivate: [authGuard, adminGuard] },
-  { path: 'profile', component: ProfilePageComponent, canActivate: [authGuard] },
-  { path: 'quotations', component: QuotationListPageComponent, canActivate: [authGuard] },
-  { path: 'quotations/new', component: QuotationDetailPageComponent, canActivate: [authGuard] },
-  { path: 'quotations/:id', component: QuotationDetailPageComponent, canActivate: [authGuard] },
-  { path: '**', redirectTo: 'dashboard' }
+  // ─── Rotas públicas (guest) ─────────────────────────────────────────────────
+  {
+    path: 'login',
+    canActivate: [guestGuard],
+    loadComponent: () =>
+      import('./auth/login/login.component').then((m) => m.LoginComponent),
+  },
+
+  // ─── Rotas protegidas (shell com sidenav) ────────────────────────────────────
+  {
+    path: '',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./layout/shell/shell.component').then((m) => m.ShellComponent),
+    children: [
+      {
+        path: 'painel',
+        loadComponent: () =>
+          import('./components/painel/painel.component').then((m) => m.PainelComponent),
+      },
+      {
+        path: 'perfil',
+        loadComponent: () =>
+          import('./components/perfil/perfil.component').then((m) => m.PerfilComponent),
+      },
+      // ─── Clientes ────────────────────────────────────────────────────────────
+      {
+        path: 'clientes',
+        loadComponent: () =>
+          import('./components/clientes/lista-clientes/lista-clientes.component').then(
+            (m) => m.ListaClientesComponent
+          ),
+      },
+      {
+        path: 'clientes/novo',
+        loadComponent: () =>
+          import('./components/clientes/form-cliente/form-cliente.component').then(
+            (m) => m.FormClienteComponent
+          ),
+      },
+      {
+        path: 'clientes/:id',
+        loadComponent: () =>
+          import('./components/clientes/form-cliente/form-cliente.component').then(
+            (m) => m.FormClienteComponent
+          ),
+      },
+      // ─── Cotações ─────────────────────────────────────────────────────────────
+      {
+        path: 'cotacoes',
+        loadComponent: () =>
+          import('./components/cotacoes/lista-cotacoes/lista-cotacoes.component').then(
+            (m) => m.ListaCotacoesComponent
+          ),
+      },
+      {
+        path: 'cotacoes/nova/:clienteId',
+        loadComponent: () =>
+          import('./components/cotacoes/form-cotacao/form-cotacao.component').then(
+            (m) => m.FormCotacaoComponent
+          ),
+      },
+      {
+        path: 'cotacoes/:id',
+        loadComponent: () =>
+          import('./components/cotacoes/form-cotacao/form-cotacao.component').then(
+            (m) => m.FormCotacaoComponent
+          ),
+      },
+      // ─── Usuários ─────────────────────────────────────────────────────────────
+      {
+        path: 'usuarios',
+        loadComponent: () =>
+          import('./components/usuarios/lista-usuarios/lista-usuarios.component').then(
+            (m) => m.ListaUsuariosComponent
+          ),
+      },
+      {
+        path: 'usuarios/novo',
+        loadComponent: () =>
+          import('./components/usuarios/form-usuario/form-usuario.component').then(
+            (m) => m.FormUsuarioComponent
+          ),
+      },
+      {
+        path: 'usuarios/:id',
+        loadComponent: () =>
+          import('./components/usuarios/form-usuario/form-usuario.component').then(
+            (m) => m.FormUsuarioComponent
+          ),
+      },
+    ],
+  },
+
+  { path: '**', redirectTo: '/painel' },
 ];

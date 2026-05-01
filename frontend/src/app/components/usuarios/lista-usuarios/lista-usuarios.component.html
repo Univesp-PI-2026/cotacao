@@ -1,0 +1,64 @@
+<div class="pagina-conteudo">
+  <div class="cabecalho-secao">
+    <div class="titulo-com-voltar">
+      <a mat-icon-button routerLink="/painel" matTooltip="Voltar ao painel">
+        <mat-icon>arrow_back</mat-icon>
+      </a>
+      <h2>Usuários</h2>
+    </div>
+    <a mat-flat-button color="primary" routerLink="/usuarios/novo">
+      <mat-icon>person_add</mat-icon>
+      NOVO USUÁRIO
+    </a>
+  </div>
+
+  <mat-form-field appearance="outline" class="campo-busca">
+    <mat-label>Buscar usuário</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
+    <input matInput [(ngModel)]="termoBusca" (ngModelChange)="filtrar()" placeholder="Nome ou e-mail..." />
+    @if (termoBusca) {
+      <button mat-icon-button matSuffix (click)="termoBusca = ''; filtrar()">
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+  </mat-form-field>
+
+  @if (carregando) {
+    <div class="estado-carregando">
+      <mat-spinner diameter="40" />
+    </div>
+  } @else if (usuariosFiltrados.length === 0) {
+    <div class="estado-vazio">
+      <mat-icon>manage_accounts</mat-icon>
+      <p>Nenhum usuário encontrado.</p>
+    </div>
+  } @else {
+    <div class="lista">
+      @for (usuario of usuariosFiltrados; track usuario.id) {
+        <mat-card class="lista-card">
+          <mat-card-content class="card-conteudo">
+            <div class="card-info">
+              <div class="avatar-usuario">{{ usuario.nome[0].toUpperCase() }}</div>
+              <div class="dados-usuario">
+                <p class="nome-usuario">{{ usuario.nome }}</p>
+                <p class="email-usuario">{{ usuario.email }}</p>
+                <span class="badge-role">{{ usuario.roleNome ?? 'Operador' }}</span>
+              </div>
+            </div>
+
+            <div class="card-acoes">
+              <a mat-stroked-button [routerLink]="['/usuarios', usuario.id]" matTooltip="Editar usuário">
+                <mat-icon>edit</mat-icon>
+                Editar
+              </a>
+              <button mat-stroked-button color="warn" (click)="confirmarExclusao(usuario)">
+                <mat-icon>delete</mat-icon>
+                Excluir
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  }
+</div>
