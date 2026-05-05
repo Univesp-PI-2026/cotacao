@@ -29,6 +29,7 @@ logs/
 # Docker / MySQL
 # =========================
 database/mysql/data/
+data/database.sqlite
 
 # =========================
 # OS / Editor
