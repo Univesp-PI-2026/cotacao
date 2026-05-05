@@ -81,12 +81,12 @@ services:
     networks:
       - network01
 
-  myadmin:
+  db-admin:
     image: phpmyadmin/phpmyadmin
     container_name: ${CONTAINER_PREFIX:-cotacao-v02}-${APP_ENV:-dev}-myadmin
     restart: unless-stopped
     ports:
-      - "${PHPMYADMIN_PORT:-8081}:80"
+      - "${PHPMYADMIN_PORT:-8082}:80"
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
@@ -108,6 +108,8 @@ services:
     volumes:
       - ./data:/data
       - ./letsencrypt:/etc/letsencrypt
+    networks:
+      - network01
 networks:
   network01:
     name: ${CONTAINER_PREFIX:-cotacao-v02}-${APP_ENV:-dev}-network01  
