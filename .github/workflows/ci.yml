@@ -1,0 +1,21 @@
+ name: CI Teste
+
+on:
+  push:
+    branches: [dev]
+  pull_request:
+    branches: [dev]
+
+jobs:
+  teste:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Mostrar arquivos (debug)
+        run: ls -la
+
+      - name: Teste simples
+        run: echo "CI funcionando com sucesso 🚀"
