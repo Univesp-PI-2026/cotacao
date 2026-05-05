@@ -8,16 +8,62 @@ on:
     branches:
       - dev
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
-  teste:
+  backend:
+    name: Backend tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
 
     steps:
       - name: Checkout codigo
         uses: actions/checkout@v4
 
-      - name: Mostrar arquivos
-        run: ls -la
+      - name: Preparar arquivo .env
+        run: cp "$GITHUB_WORKSPACE/.env.dev" "$GITHUB_WORKSPACE/.env"
 
-      - name: Teste simples
-        run: echo "CI funcionando"
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Instalar dependencias do backend
+        run: npm ci
+
+      - name: Rodar testes do backend
+        env:
+          JWT_SECRET: test-secret
+        run: npm test
+
+  frontend:
+    name: Frontend build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout codigo
+        uses: actions/checkout@v4
+
+      - name: Preparar arquivo .env
+        run: cp "$GITHUB_WORKSPACE/.env.dev" "$GITHUB_WORKSPACE/.env"
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependencias do frontend
+        run: npm ci
+
+      - name: Gerar build de producao
+        run: npm run build
