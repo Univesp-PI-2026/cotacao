@@ -45,12 +45,12 @@ services:
     container_name: ${CONTAINER_PREFIX:-cotacao-v02}-${APP_ENV:-dev}-db
     restart: unless-stopped
     ports:
-      - "${MYSQL_PORT:-3307}:3306"
+      - "${MYSQL_HOST_PORT:-3307}:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-cotacao_v02}
-      MYSQL_USER: ${MYSQL_USER:-cotacao_user}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-cotacao_pass}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_NAME:-cotacao_v02}
+      MYSQL_USER: ${DB_USER:-cotacao_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-cotacao_pass}
     volumes:
       - ./database/mysql/data:/data/mysql
       - ./database/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
@@ -71,9 +71,9 @@ services:
       - -baselineOnMigrate=true
       - -validateMigrationNaming=true
       - -locations=filesystem:/flyway/sql/common,filesystem:/flyway/sql/${APP_ENV:-dev}
-      - -url=jdbc:mysql://db:3306/${MYSQL_DATABASE:-cotacao_v02}?useSSL=false&allowPublicKeyRetrieval=true
-      - -user=${MYSQL_USER:-cotacao_user}
-      - -password=${MYSQL_PASSWORD:-cotacao_pass}
+      - -url=jdbc:mysql://${DB_HOST:-db}:${DB_PORT:-3306}/${DB_NAME:-cotacao_v02}?useSSL=false&allowPublicKeyRetrieval=true
+      - -user=${DB_USER:-cotacao_user}
+      - -password=${DB_PASSWORD:-cotacao_pass}
       - migrate
     volumes:
       - ./database/migrations:/flyway/sql:ro
@@ -90,10 +90,10 @@ services:
     ports:
       - "${PHPMYADMIN_PORT:-8082}:80"
     environment:
-      PMA_HOST: db
-      PMA_PORT: 3306
-      PMA_USER: ${MYSQL_USER:-cotacao_user}
-      PMA_PASSWORD: ${MYSQL_PASSWORD:-cotacao_pass}
+      PMA_HOST: ${DB_HOST:-db}
+      PMA_PORT: ${DB_PORT:-3306}
+      PMA_USER: ${DB_USER:-cotacao_user}
+      PMA_PASSWORD: ${DB_PASSWORD:-cotacao_pass}
     depends_on:
       db:
         condition: service_healthy

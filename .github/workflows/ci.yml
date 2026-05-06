@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - dev
-  pull_request:
-    branches:
-      - dev
       - master
   pull_request:
     branches:
@@ -15,6 +12,10 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  NPM_CONFIG_FETCH_RETRIES: 5
+  NPM_CONFIG_FETCH_RETRY_FACTOR: 2
+  NPM_CONFIG_FETCH_RETRY_MINTIMEOUT: 10000
+  NPM_CONFIG_FETCH_RETRY_MAXTIMEOUT: 60000
 
 jobs:
   backend:
@@ -28,13 +29,13 @@ jobs:
       - name: Checkout codigo
         uses: actions/checkout@v4
 
-      - name: Preparar .env DEV
-        if: github.ref == 'refs/heads/dev'
-        run: cp "$GITHUB_WORKSPACE/.env.dev" .env
+      - name: Preparar arquivo .env DEV
+        if: github.base_ref == 'dev' || github.ref == 'refs/heads/dev'
+        run: cp "$GITHUB_WORKSPACE/.env.dev.example" "$GITHUB_WORKSPACE/.env"
 
-      - name: Preparar .env PROD
-        if: github.ref == 'refs/heads/master'
-        run: cp "$GITHUB_WORKSPACE/.env.prod" .env
+      - name: Preparar arquivo .env PROD
+        if: github.base_ref == 'master' || github.ref == 'refs/heads/master'
+        run: cp "$GITHUB_WORKSPACE/.env.prod.example" "$GITHUB_WORKSPACE/.env"
 
       - name: Configurar Node.js
         uses: actions/setup-node@v4
@@ -44,7 +45,21 @@ jobs:
           cache-dependency-path: backend/package-lock.json
 
       - name: Instalar dependencias do backend
-        run: npm ci
+        run: |
+          for attempt in 1 2 3; do
+            if npm ci; then
+              exit 0
+            fi
+
+            if [ "$attempt" -lt 3 ]; then
+              echo "npm ci falhou na tentativa $attempt. Limpando cache do npm e tentando novamente..."
+              npm cache clean --force
+              sleep $((attempt * 5))
+            fi
+          done
+
+          echo "npm ci falhou apos 3 tentativas."
+          exit 1
 
       - name: Rodar testes do backend
         env:
@@ -62,8 +77,14 @@ jobs:
       - name: Checkout codigo
         uses: actions/checkout@v4
 
-      - name: Preparar arquivo .env
-        run: cp "$GITHUB_WORKSPACE/.env.dev" "$GITHUB_WORKSPACE/.env"
+      - name: Preparar arquivo .env DEV
+        if: github.base_ref == 'dev' || github.ref == 'refs/heads/dev'
+        run: cp "$GITHUB_WORKSPACE/.env.dev.example" "$GITHUB_WORKSPACE/.env"
+
+      - name: Preparar arquivo .env PROD
+        if: github.base_ref == 'master' || github.ref == 'refs/heads/master'
+        run: cp "$GITHUB_WORKSPACE/.env.prod.example" "$GITHUB_WORKSPACE/.env"
+
 
       - name: Configurar Node.js
         uses: actions/setup-node@v4
@@ -73,10 +94,54 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Instalar dependencias do frontend
-        run: npm ci
+        run: |
+          for attempt in 1 2 3; do
+            if npm ci; then
+              exit 0
+            fi
+
+            if [ "$attempt" -lt 3 ]; then
+              echo "npm ci falhou na tentativa $attempt. Limpando cache do npm e tentando novamente..."
+              npm cache clean --force
+              sleep $((attempt * 5))
+            fi
+          done
+
+          echo "npm ci falhou apos 3 tentativas."
+          exit 1
 
       - name: Rodar testes do frontend
         run: npm run test:ci
 
       - name: Gerar build
         run: npm run build
+  deploy-prod:
+    name: Deploy produção
+    runs-on: ubuntu-latest
+    needs:
+      - backend
+      - frontend
+    if: github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Deploy na VM via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: ${{ secrets.PROD_SSH_PORT }}
+          script: |
+            cd ~/projects/cotacao
+
+            git fetch origin
+            git checkout master
+            git pull origin master
+
+            cp .env.prod.example .env
+
+            docker compose down
+            docker compose up -d --build
+
+            docker image prune -f
+            
