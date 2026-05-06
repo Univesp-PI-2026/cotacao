@@ -4,10 +4,9 @@ on:
   push:
     branches:
       - dev
-      - master
   pull_request:
     branches:
-      - master
+      - dev
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -24,8 +23,13 @@ jobs:
       - name: Checkout codigo
         uses: actions/checkout@v4
 
-      - name: Preparar arquivo .env
-        run: cp "$GITHUB_WORKSPACE/.env.dev" "$GITHUB_WORKSPACE/.env"
+      - name: Preparar .env DEV
+        if: github.ref == 'refs/heads/dev'
+        run: cp "$GITHUB_WORKSPACE/.env.dev" .env
+
+      - name: Preparar .env PROD
+        if: github.ref == 'refs/heads/master'
+        run: cp "$GITHUB_WORKSPACE/.env.prod" .env
 
       - name: Configurar Node.js
         uses: actions/setup-node@v4
