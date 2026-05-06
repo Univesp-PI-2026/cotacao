@@ -13,8 +13,12 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      pull-requests: write
+
     steps:
-      - name: Delete merged branch
+      - name: Delete merged remote branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
