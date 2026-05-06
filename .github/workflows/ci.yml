@@ -59,8 +59,14 @@ jobs:
       - name: Checkout codigo
         uses: actions/checkout@v4
 
-      - name: Preparar arquivo .env
-        run: cp "$GITHUB_WORKSPACE/.env.dev" "$GITHUB_WORKSPACE/.env"
+      - name: Preparar arquivo .env DEV
+        if: github.base_ref == 'dev' || github.ref == 'refs/heads/dev'
+        run: cp "$GITHUB_WORKSPACE/.env.dev.example" "$GITHUB_WORKSPACE/.env"
+
+      - name: Preparar arquivo .env PROD
+        if: github.base_ref == 'master' || github.ref == 'refs/heads/master'
+        run: cp "$GITHUB_WORKSPACE/.env.prod.example" "$GITHUB_WORKSPACE/.env"
+
 
       - name: Configurar Node.js
         uses: actions/setup-node@v4
