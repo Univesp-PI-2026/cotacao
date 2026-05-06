@@ -26,6 +26,8 @@ services:
       DB_NAME: ${DB_NAME:-cotacao_v02}
       DB_USER: ${DB_USER:-cotacao_user}
       DB_PASSWORD: ${DB_PASSWORD:-cotacao_pass}
+      JWT_SECRET: ${JWT_SECRET:-change_me}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
     volumes:
       - ./backend:/usr/src/app
       - /usr/src/app/node_modules
@@ -97,19 +99,19 @@ services:
         condition: service_healthy
     networks:
       - network01
-  nginx:
-    image: jc21/nginx-proxy-manager:latest
-    container_name: nginx-proxy
-    restart: always
-    ports:
-      - "80:80"
-      - "8081:81"
-      - "443:443"
-    volumes:
-      - ./data:/data
-      - ./letsencrypt:/etc/letsencrypt
-    networks:
-      - network01
+  # nginx:
+  #   image: jc21/nginx-proxy-manager:latest
+  #   container_name: nginx-proxy
+  #   restart: always
+  #   ports:
+  #     - "80:80"
+  #     - "8081:81"
+  #     - "443:443"
+  #   volumes:
+  #     - ./data:/data
+  #     - ./letsencrypt:/etc/letsencrypt
+  #   networks:
+  #     - network01
 networks:
   network01:
     name: ${CONTAINER_PREFIX:-cotacao-v02}-${APP_ENV:-dev}-network01  

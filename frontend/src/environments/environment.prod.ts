@@ -1,4 +1,6 @@
+import { sharedEnvironment } from './environment.shared';
+
 export const environment = {
   production: true,
-  apiUrl: '/api',
+  apiUrl: sharedEnvironment.productionApiUrl,
 };
