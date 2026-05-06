@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - dev
-  pull_request:
-    branches:
-      - dev
       - master
   pull_request:
     branches:
@@ -28,13 +25,13 @@ jobs:
       - name: Checkout codigo
         uses: actions/checkout@v4
 
-      - name: Preparar .env DEV
-        if: github.ref == 'refs/heads/dev'
-        run: cp "$GITHUB_WORKSPACE/.env.dev" .env
+      - name: Preparar arquivo .env DEV
+        if: github.base_ref == 'dev' || github.ref == 'refs/heads/dev'
+        run: cp "$GITHUB_WORKSPACE/.env.dev.example" "$GITHUB_WORKSPACE/.env"
 
-      - name: Preparar .env PROD
-        if: github.ref == 'refs/heads/master'
-        run: cp "$GITHUB_WORKSPACE/.env.prod" .env
+      - name: Preparar arquivo .env PROD
+        if: github.base_ref == 'master' || github.ref == 'refs/heads/master'
+        run: cp "$GITHUB_WORKSPACE/.env.prod.example" "$GITHUB_WORKSPACE/.env"
 
       - name: Configurar Node.js
         uses: actions/setup-node@v4
