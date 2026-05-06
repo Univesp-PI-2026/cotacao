@@ -114,5 +114,5 @@ services:
   #     - network01
 networks:
   network01:
-    name: ${CONTAINER_PREFIX:-cotacao-v02}-${APP_ENV:-dev}-network01  
+    name: ${CONTAINER_PREFIX:-cotacao-v02}-${APP_ENV:-dev}-network
     driver: bridge
