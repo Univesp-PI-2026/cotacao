@@ -2,11 +2,16 @@
   "name": "grupo05-seguros",
   "version": "0.0.0",
   "scripts": {
+    "prestart": "node ./scripts/sync-root-env.mjs",
+    "prebuild": "node ./scripts/sync-root-env.mjs",
+    "prewatch": "node ./scripts/sync-root-env.mjs",
+    "pretest": "node ./scripts/sync-root-env.mjs",
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "test:ci": "ng test --watch=false --browsers=ChromeHeadlessCI"
   },
   "private": true,
   "dependencies": {
