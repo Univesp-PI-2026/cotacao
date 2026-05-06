@@ -43,6 +43,16 @@ docker compose --env-file .env.homo up --build
 docker compose --env-file .env.prod up --build
 ```
 
+## Hooks Git Compartilhados
+
+Para sincronizar automaticamente `.env.dev` para `.env` ao trocar para a branch `dev`
+ou ao fazer `git pull`, ative os hooks versionados do repositorio:
+
+```bash
+git config core.hooksPath .githooks
+chmod +x .githooks/post-merge .githooks/post-checkout scripts/sync-dev-env.sh
+```
+
 ## Endpoints iniciais
 
 - `GET /health`
