@@ -26,6 +26,8 @@ services:
       DB_NAME: ${DB_NAME:-cotacao_v02}
       DB_USER: ${DB_USER:-cotacao_user}
       DB_PASSWORD: ${DB_PASSWORD:-cotacao_pass}
+      JWT_SECRET: ${JWT_SECRET:-change_me}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
     volumes:
       - ./backend:/usr/src/app
       - /usr/src/app/node_modules
