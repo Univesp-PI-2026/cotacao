@@ -8,30 +8,7 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
 const repoRoot = path.resolve(projectRoot, '..');
 const outputPath = path.join(projectRoot, 'src/environments/environment.shared.ts');
-
-function resolveEnvPath() {
-  const envFile = process.env.ENV_FILE;
-
-  if (!envFile) {
-    const defaultPath = path.join(repoRoot, '.env');
-    return fs.existsSync(defaultPath) ? defaultPath : null;
-  }
-
-  const candidatePaths = path.isAbsolute(envFile)
-    ? [envFile]
-    : [
-        path.resolve(process.cwd(), envFile),
-        path.resolve(repoRoot, envFile),
-      ];
-
-  for (const candidatePath of candidatePaths) {
-    if (fs.existsSync(candidatePath)) {
-      return candidatePath;
-    }
-  }
-
-  return null;
-}
+const envPath = path.join(repoRoot, '.env');
 
 function parseEnvFile(content) {
   const variables = {};
@@ -71,17 +48,11 @@ function resolveApiUrl(envVariables) {
   return `http://localhost:${backendPort}`;
 }
 
-const envPath = resolveEnvPath();
 let envVariables = {};
 
-if (envPath) {
+if (fs.existsSync(envPath)) {
   envVariables = parseEnvFile(fs.readFileSync(envPath, 'utf8'));
 }
-
-envVariables = {
-  ...envVariables,
-  ...process.env,
-};
 
 const apiUrl = resolveApiUrl(envVariables);
 const fileContents = `export const sharedEnvironment = {

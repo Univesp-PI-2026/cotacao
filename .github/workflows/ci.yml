@@ -9,7 +9,6 @@ on:
       - dev
 
 env:
-  ENV_FILE: ${{ github.workspace }}/.env.dev
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
@@ -35,6 +34,8 @@ jobs:
         run: npm ci
 
       - name: Rodar testes do backend
+        env:
+          JWT_SECRET: test-secret
         run: npm test
 
   frontend:
@@ -58,5 +59,8 @@ jobs:
       - name: Instalar dependencias do frontend
         run: npm ci
 
-      - name: Gerar build de producao
+      - name: Rodar testes do frontend
+        run: npm run test:ci
+
+      - name: Gerar build
         run: npm run build

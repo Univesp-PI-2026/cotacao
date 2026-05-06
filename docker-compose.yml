@@ -99,19 +99,19 @@ services:
         condition: service_healthy
     networks:
       - network01
-  nginx:
-    image: jc21/nginx-proxy-manager:latest
-    container_name: nginx-proxy
-    restart: always
-    ports:
-      - "80:80"
-      - "8081:81"
-      - "443:443"
-    volumes:
-      - ./data:/data
-      - ./letsencrypt:/etc/letsencrypt
-    networks:
-      - network01
+  # nginx:
+  #   image: jc21/nginx-proxy-manager:latest
+  #   container_name: nginx-proxy
+  #   restart: always
+  #   ports:
+  #     - "80:80"
+  #     - "8081:81"
+  #     - "443:443"
+  #   volumes:
+  #     - ./data:/data
+  #     - ./letsencrypt:/etc/letsencrypt
+  #   networks:
+  #     - network01
 networks:
   network01:
     name: ${CONTAINER_PREFIX:-cotacao-v02}-${APP_ENV:-dev}-network01  
