@@ -23,6 +23,9 @@ jobs:
       - name: Checkout codigo
         uses: actions/checkout@v4
 
+      - name: Preparar arquivo .env
+        run: cp "$GITHUB_WORKSPACE/.env.dev" "$GITHUB_WORKSPACE/.env"
+
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
@@ -48,6 +51,9 @@ jobs:
     steps:
       - name: Checkout codigo
         uses: actions/checkout@v4
+
+      - name: Preparar arquivo .env
+        run: cp "$GITHUB_WORKSPACE/.env.dev" "$GITHUB_WORKSPACE/.env"
 
       - name: Configurar Node.js
         uses: actions/setup-node@v4
