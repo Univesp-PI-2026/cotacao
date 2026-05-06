@@ -12,6 +12,10 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  NPM_CONFIG_FETCH_RETRIES: 5
+  NPM_CONFIG_FETCH_RETRY_FACTOR: 2
+  NPM_CONFIG_FETCH_RETRY_MINTIMEOUT: 10000
+  NPM_CONFIG_FETCH_RETRY_MAXTIMEOUT: 60000
 
 jobs:
   backend:
@@ -41,7 +45,21 @@ jobs:
           cache-dependency-path: backend/package-lock.json
 
       - name: Instalar dependencias do backend
-        run: npm ci
+        run: |
+          for attempt in 1 2 3; do
+            if npm ci; then
+              exit 0
+            fi
+
+            if [ "$attempt" -lt 3 ]; then
+              echo "npm ci falhou na tentativa $attempt. Limpando cache do npm e tentando novamente..."
+              npm cache clean --force
+              sleep $((attempt * 5))
+            fi
+          done
+
+          echo "npm ci falhou apos 3 tentativas."
+          exit 1
 
       - name: Rodar testes do backend
         env:
@@ -59,8 +77,14 @@ jobs:
       - name: Checkout codigo
         uses: actions/checkout@v4
 
-      - name: Preparar arquivo .env
-        run: cp "$GITHUB_WORKSPACE/.env.dev" "$GITHUB_WORKSPACE/.env"
+      - name: Preparar arquivo .env DEV
+        if: github.base_ref == 'dev' || github.ref == 'refs/heads/dev'
+        run: cp "$GITHUB_WORKSPACE/.env.dev.example" "$GITHUB_WORKSPACE/.env"
+
+      - name: Preparar arquivo .env PROD
+        if: github.base_ref == 'master' || github.ref == 'refs/heads/master'
+        run: cp "$GITHUB_WORKSPACE/.env.prod.example" "$GITHUB_WORKSPACE/.env"
+
 
       - name: Configurar Node.js
         uses: actions/setup-node@v4
@@ -70,7 +94,21 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Instalar dependencias do frontend
-        run: npm ci
+        run: |
+          for attempt in 1 2 3; do
+            if npm ci; then
+              exit 0
+            fi
+
+            if [ "$attempt" -lt 3 ]; then
+              echo "npm ci falhou na tentativa $attempt. Limpando cache do npm e tentando novamente..."
+              npm cache clean --force
+              sleep $((attempt * 5))
+            fi
+          done
+
+          echo "npm ci falhou apos 3 tentativas."
+          exit 1
 
       - name: Rodar testes do frontend
         run: npm run test:ci
