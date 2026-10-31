@@ -41,7 +41,7 @@
 
           <mat-form-field appearance="outline">
             <mat-label>Data de Nascimento</mat-label>
-            <input matInput type="date" formControlName="dataNascimento" autocomplete="bday" />
+            <input matInput type="text" appDateMask formControlName="dataNascimento" placeholder="dd/mm/aaaa" inputmode="numeric" maxlength="10" autocomplete="bday" />
             @if (formulario.get('dataNascimento')?.hasError('required') && formulario.get('dataNascimento')?.touched) {
               <mat-error>Data de nascimento é obrigatória</mat-error>
             }

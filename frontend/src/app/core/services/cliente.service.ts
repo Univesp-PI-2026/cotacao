@@ -11,7 +11,7 @@ interface CustomerApi {
   is_foreign: number;
   cpf: string | null;
   rnm: string | null;
-  birth_date: string;
+  birth_date: string | Date | null;
   zip_code: string;
   street: string;
   number: string;
@@ -28,6 +28,19 @@ export class ClienteService {
 
   constructor(private http: HttpClient) {}
 
+  private toDateInput(value: CustomerApi['birth_date']): string {
+    if (!value) return '';
+
+    if (value instanceof Date) {
+      const year = value.getFullYear();
+      const month = String(value.getMonth() + 1).padStart(2, '0');
+      const day = String(value.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    return value.slice(0, 10);
+  }
+
   private fromApi(c: CustomerApi): Cliente {
     return {
       id: c.id,
@@ -36,7 +49,7 @@ export class ClienteService {
       estrangeiro: c.is_foreign === 1,
       cpf: c.cpf ?? undefined,
       rnm: c.rnm ?? undefined,
-      dataNascimento: c.birth_date,
+      dataNascimento: this.toDateInput(c.birth_date),
       cep: c.zip_code,
       logradouro: c.street,
       numero: c.number,

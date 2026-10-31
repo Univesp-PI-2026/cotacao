@@ -13,6 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ClienteService } from '../../../core/services/cliente.service';
 import { CepService } from '../../../core/services/cep.service';
 import { mensagemValidacaoApi } from '../../../core/utils/mensagem-validacao-api';
+import { DateMaskDirective } from '../../../shared/directives/date-mask.directive';
 
 const ESTADOS_BR = [
   'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG',
@@ -33,6 +34,7 @@ const ESTADOS_BR = [
     MatSelectModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
+    DateMaskDirective,
   ],
   templateUrl: './form-cliente.component.html',
   styleUrl: './form-cliente.component.scss',

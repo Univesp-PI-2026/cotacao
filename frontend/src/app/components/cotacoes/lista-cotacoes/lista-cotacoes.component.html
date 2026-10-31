@@ -62,7 +62,7 @@
                     <span><strong>Renda mensal:</strong> {{ formatarRenda(cotacao.rendaMensal) }}</span>
                     <span><strong>Profissão:</strong> {{ cotacao.profissao }}</span>
                   }
-                  <span><strong>Solicitação:</strong> {{ cotacao.dataSolicitacao }}</span>
+                  <span><strong>Solicitação:</strong> {{ cotacao.dataSolicitacao | dataBr }}</span>
                   @if (!cotacao.produto || cotacao.produto === 'auto') {
                     <span><strong>Ano:</strong> {{ cotacao.anoFabricacao }}</span>
                   }
