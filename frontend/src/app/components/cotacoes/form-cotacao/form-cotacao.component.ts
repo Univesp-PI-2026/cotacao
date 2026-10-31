@@ -14,6 +14,15 @@ import { CotacaoService } from '../../../core/services/cotacao.service';
 import { ClienteService } from '../../../core/services/cliente.service';
 import { Cliente } from '../../../core/models/cliente.model';
 import { PRODUTOS_COTACAO, ProdutoCotacao } from '../../../core/models/cotacao.model';
+import { DateMaskDirective } from '../../../shared/directives/date-mask.directive';
+
+function dataAtualIso(): string {
+  const hoje = new Date();
+  const ano = hoje.getFullYear();
+  const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+  const dia = String(hoje.getDate()).padStart(2, '0');
+  return `${ano}-${mes}-${dia}`;
+}
 
 @Component({
   selector: 'app-form-cotacao',
@@ -30,6 +39,7 @@ import { PRODUTOS_COTACAO, ProdutoCotacao } from '../../../core/models/cotacao.m
     MatSelectModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
+    DateMaskDirective,
   ],
   templateUrl: './form-cotacao.component.html',
   styleUrl: './form-cotacao.component.scss',
@@ -60,7 +70,7 @@ export class FormCotacaoComponent implements OnInit {
     this.formulario = this.fb.group({
       clienteId: [null, Validators.required],
       produto: ['auto', Validators.required],
-      dataSolicitacao: ['', Validators.required],
+      dataSolicitacao: [dataAtualIso(), Validators.required],
       tipoSeguro: ['novo', Validators.required],
       classeBonus: [''],
       teveSinistro: [null],

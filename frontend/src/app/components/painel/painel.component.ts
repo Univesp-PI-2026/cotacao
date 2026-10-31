@@ -32,8 +32,8 @@ export class PainelComponent implements OnInit {
   });
 
   cartoes: CartaoAtalho[] = [
-    { titulo: 'Clientes', icone: 'people', cor: '#3949ab', rota: '/clientes', total: 0, descricao: 'Cadastros de clientes' },
-    { titulo: 'Cotações', icone: 'description', cor: '#e91e63', rota: '/cotacoes', total: 0, descricao: 'Cotações de seguro' },
+    { titulo: 'Clientes', icone: 'people', cor: '#e91e63', rota: '/clientes', total: 0, descricao: 'Cadastros de clientes' },
+    { titulo: 'Cotações', icone: 'description', cor: '#3949ab', rota: '/cotacoes', total: 0, descricao: 'Cotações de seguro' },
     { titulo: 'Usuários', icone: 'manage_accounts', cor: '#00897b', rota: '/usuarios', total: 0, descricao: 'Usuários do sistema' },
   ];
 

@@ -59,6 +59,26 @@ describe('ClienteService', () => {
     expect(cliente?.logradouro).toBe('Av. Paulista');
   });
 
+  it('normaliza data de nascimento ISO com horário para o input date', async () => {
+    const promise = service.buscarPorId(1);
+    httpMock.expectOne(`${url}/1`).flush({
+      ...mockCustomerApi,
+      birth_date: '1985-03-15T00:00:00.000Z',
+    });
+
+    expect((await promise)?.dataNascimento).toBe('1985-03-15');
+  });
+
+  it('normaliza data de nascimento recebida como Date sem deslocar o dia', async () => {
+    const promise = service.buscarPorId(1);
+    httpMock.expectOne(`${url}/1`).flush({
+      ...mockCustomerApi,
+      birth_date: new Date(1985, 2, 15),
+    });
+
+    expect((await promise)?.dataNascimento).toBe('1985-03-15');
+  });
+
   it('criar faz POST com payload mapeado PT→EN', async () => {
     const promise = service.criar({
       nome: 'João', email: 'joao@test.com', estrangeiro: false,

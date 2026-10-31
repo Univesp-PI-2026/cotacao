@@ -16,6 +16,7 @@ import {
   ConfirmarDialogComponent,
   DadosConfirmacao,
 } from '../../../shared/components/confirmar-dialog/confirmar-dialog.component';
+import { DataBrPipe } from '../../../shared/pipes/data-br.pipe';
 
 @Component({
   selector: 'app-lista-cotacoes',
@@ -32,6 +33,7 @@ import {
     MatTooltipModule,
     MatDialogModule,
     MatProgressSpinnerModule,
+    DataBrPipe,
   ],
   templateUrl: './lista-cotacoes.component.html',
   styleUrl: './lista-cotacoes.component.scss',
