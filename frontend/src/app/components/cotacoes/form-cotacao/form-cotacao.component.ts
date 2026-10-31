@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,10 +13,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CotacaoService } from '../../../core/services/cotacao.service';
 import { ClienteService } from '../../../core/services/cliente.service';
 import { Cliente } from '../../../core/models/cliente.model';
+import { PRODUTOS_COTACAO, ProdutoCotacao } from '../../../core/models/cotacao.model';
 
 @Component({
   selector: 'app-form-cotacao',
   standalone: true,
+  providers: [{ provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { subscriptSizing: 'dynamic' } }],
   imports: [
     ReactiveFormsModule,
     RouterLink,
@@ -37,6 +40,14 @@ export class FormCotacaoComponent implements OnInit {
   editando = false;
   cotacaoId?: number;
   cliente?: Cliente;
+  produtos = PRODUTOS_COTACAO;
+  estados = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG',
+    'PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly camposAuto = ['placaVeiculo', 'chassi', 'marca', 'modelo', 'anoFabricacao',
+    'cepPernoite', 'idadeCondutor', 'tempoHabilitacao'];
+  private readonly camposImovel = ['cepImovel', 'logradouroImovel', 'numeroImovel', 'complementoImovel',
+    'bairroImovel', 'cidadeImovel', 'estadoImovel'];
 
   constructor(
     private fb: FormBuilder,
@@ -47,7 +58,8 @@ export class FormCotacaoComponent implements OnInit {
     private snackBar: MatSnackBar
   ) {
     this.formulario = this.fb.group({
-      clienteId: [null],
+      clienteId: [null, Validators.required],
+      produto: ['auto', Validators.required],
       dataSolicitacao: ['', Validators.required],
       tipoSeguro: ['novo', Validators.required],
       classeBonus: [''],
@@ -66,7 +78,18 @@ export class FormCotacaoComponent implements OnInit {
       coberturas: [''],
       temSeguradoraPreferida: [false, Validators.required],
       seguradoraPreferida: [''],
+      cepImovel: ['', [Validators.required, Validators.pattern(/^\d{8}$/)]],
+      logradouroImovel: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(255)]],
+      numeroImovel: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(30)]],
+      complementoImovel: ['', Validators.maxLength(255)],
+      bairroImovel: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(120)]],
+      cidadeImovel: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(120)]],
+      estadoImovel: ['', Validators.required],
+      rendaMensal: [null, [Validators.required, Validators.min(0.01), Validators.max(99999999999.99),
+        Validators.pattern(/^\d+(\.\d{1,2})?$/)]],
+      profissao: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(255)]],
     });
+    this.atualizarProduto();
   }
 
   async ngOnInit(): Promise<void> {
@@ -89,31 +112,78 @@ export class FormCotacaoComponent implements OnInit {
     }
 
     // Controles condicionais
-    this.formulario.get('tipoSeguro')?.valueChanges.subscribe(() => {
+    this.formulario.get('produto')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.atualizarProduto();
+    });
+
+    this.formulario.get('tipoSeguro')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.atualizarValidacoesRenovacao();
     });
 
-    this.formulario.get('temSeguradoraPreferida')?.valueChanges.subscribe(() => {
+    this.formulario.get('temSeguradoraPreferida')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.atualizarValidacaoSeguradora();
     });
 
+    this.atualizarProduto();
+  }
+
+  get produto(): ProdutoCotacao {
+    return this.formulario.get('produto')?.value ?? 'auto';
+  }
+
+  get ehSeguro(): boolean {
+    return this.produto !== 'credit_card';
+  }
+
+  selecionarProduto(produto: ProdutoCotacao): void {
+    this.formulario.get('produto')?.setValue(produto);
+  }
+
+  atualizarProduto(): void {
+    const alternar = (campos: string[], habilitado: boolean) => campos.forEach((nome) => {
+      const controle = this.formulario.get(nome)!;
+      if (habilitado) controle.enable({ emitEvent: false });
+      else controle.disable({ emitEvent: false });
+    });
+    alternar(this.camposAuto, this.produto === 'auto');
+    alternar(this.camposImovel, this.produto === 'home');
+    alternar(['rendaMensal', 'profissao'], this.produto === 'credit_card');
+    alternar(['tipoSeguro', 'coberturas', 'temSeguradoraPreferida'], this.ehSeguro);
     this.atualizarValidacoesRenovacao();
     this.atualizarValidacaoSeguradora();
   }
 
+  usarEnderecoSegurado(): void {
+    if (!this.cliente) return;
+    this.formulario.patchValue({
+      cepImovel: this.cliente.cep.replace(/\D/g, ''),
+      logradouroImovel: this.cliente.logradouro,
+      numeroImovel: this.cliente.numero,
+      complementoImovel: this.cliente.complemento ?? '',
+      bairroImovel: this.cliente.bairro,
+      cidadeImovel: this.cliente.cidade,
+      estadoImovel: this.cliente.estado.toUpperCase(),
+    });
+    this.camposImovel.forEach((campo) => this.formulario.get(campo)?.markAsDirty());
+    this.snackBar.open('Endereço do segurado copiado. Você pode ajustar os campos.', 'Fechar', { duration: 3000 });
+  }
+
   atualizarValidacoesRenovacao(): void {
-    const renovacao = this.formulario.get('tipoSeguro')?.value === 'renovacao';
+    const renovacao = this.ehRenovacao;
     const classeBonus = this.formulario.get('classeBonus')!;
     const teveSinistro = this.formulario.get('teveSinistro')!;
 
-    if (renovacao) {
+    if (renovacao && this.produto === 'auto') {
+      classeBonus.enable({ emitEvent: false });
       classeBonus.setValidators(Validators.required);
+    } else {
+      classeBonus.disable({ emitEvent: false });
+    }
+    if (renovacao) {
+      teveSinistro.enable({ emitEvent: false });
       teveSinistro.setValidators(Validators.required);
     } else {
-      classeBonus.clearValidators();
-      teveSinistro.clearValidators();
-      classeBonus.setValue('');
-      teveSinistro.setValue(null);
+      teveSinistro.disable({ emitEvent: false });
     }
     classeBonus.updateValueAndValidity();
     teveSinistro.updateValueAndValidity();
@@ -124,17 +194,17 @@ export class FormCotacaoComponent implements OnInit {
       this.formulario.get('temSeguradoraPreferida')?.value === 'true';
     const seguradora = this.formulario.get('seguradoraPreferida')!;
 
-    if (temPreferencia) {
+    if (this.ehSeguro && temPreferencia) {
+      seguradora.enable({ emitEvent: false });
       seguradora.setValidators(Validators.required);
     } else {
-      seguradora.clearValidators();
-      seguradora.setValue('');
+      seguradora.disable({ emitEvent: false });
     }
     seguradora.updateValueAndValidity();
   }
 
   get ehRenovacao(): boolean {
-    return this.formulario.get('tipoSeguro')?.value === 'renovacao';
+    return this.ehSeguro && this.formulario.get('tipoSeguro')?.value === 'renovacao';
   }
 
   get temSeguradora(): boolean {

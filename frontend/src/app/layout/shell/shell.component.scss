@@ -15,17 +15,28 @@
   padding: 20px 16px 16px;
 
   .logo-icon {
-    font-size: 2rem;
-    width: 2rem;
-    height: 2rem;
-    color: #3949ab;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
   }
 
   .logo-texto {
     font-size: 1.2rem;
     font-weight: 600;
-    color: #3949ab;
+    color: #004a80;
+
+    span {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 400;
+      letter-spacing: 1px;
+      margin-top: 2px;
+    }
   }
+}
+
+:host-context(.tema-escuro) .logo-texto {
+  color: #c5ddeb;
 }
 
 .nav-list {
@@ -68,10 +79,30 @@
   z-index: 100;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 
+  .toolbar-marca {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    margin-left: 8px;
+
+    img { flex-shrink: 0; }
+  }
+
   .toolbar-titulo {
     font-size: 1.1rem;
     font-weight: 500;
-    margin-left: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (max-width: 400px) {
+  .toolbar {
+    padding: 0 8px;
+
+    .toolbar-marca { gap: 6px; margin-left: 4px; }
+    .toolbar-titulo { font-size: 0.9rem; }
   }
 }
 

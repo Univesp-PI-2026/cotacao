@@ -10,7 +10,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Cotacao } from '../../../core/models/cotacao.model';
+import { Cotacao, PRODUTOS_COTACAO, ProdutoCotacao } from '../../../core/models/cotacao.model';
 import { CotacaoService } from '../../../core/services/cotacao.service';
 import {
   ConfirmarDialogComponent,
@@ -63,11 +63,9 @@ export class ListaCotacoesComponent implements OnInit {
     const termo = this.termoBusca.toLowerCase().trim();
     this.cotacoesFiltradas = termo
       ? this.cotacoes.filter(
-          (c) =>
-            c.clienteNome.toLowerCase().includes(termo) ||
-            c.placaVeiculo.toLowerCase().includes(termo) ||
-            c.marca.toLowerCase().includes(termo) ||
-            c.modelo.toLowerCase().includes(termo)
+          (c) => [c.clienteNome, c.placaVeiculo, c.marca, c.modelo,
+            this.rotulaProduto(c.produto), c.logradouroImovel, c.cidadeImovel, c.profissao]
+            .some((valor) => valor?.toLowerCase().includes(termo))
         )
       : [...this.cotacoes];
   }
@@ -84,7 +82,7 @@ export class ListaCotacoesComponent implements OnInit {
       .afterClosed()
       .subscribe(async (confirmado) => {
         if (confirmado) {
-          await this.cotacaoService.excluir(cotacao.id);
+          await this.cotacaoService.excluir(cotacao.id, cotacao.produto);
           this.snackBar.open('Cotação excluída.', 'Fechar', {
             duration: 3000,
             panelClass: 'snack-sucesso',
@@ -96,5 +94,17 @@ export class ListaCotacoesComponent implements OnInit {
 
   rotulaTipoSeguro(tipo: string): string {
     return tipo === 'renovacao' ? 'Renovação' : 'Novo Seguro';
+  }
+
+  rotulaProduto(produto?: ProdutoCotacao): string {
+    return PRODUTOS_COTACAO.find((p) => p.valor === (produto ?? 'auto'))?.nome ?? '';
+  }
+
+  iconeProduto(produto?: ProdutoCotacao): string {
+    return PRODUTOS_COTACAO.find((p) => p.valor === (produto ?? 'auto'))?.icone ?? 'description';
+  }
+
+  formatarRenda(valor?: number): string {
+    return valor == null ? '—' : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
   }
 }

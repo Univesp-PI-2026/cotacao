@@ -5,115 +5,128 @@ const { getRequestLocale, t } = require("../../utils/i18n");
 const quotationService = require("./quotations.service");
 const { validateQuotationPayload } = require("./quotations.validator");
 
-const router = express.Router();
+function createQuotationRouter(product) {
+  const router = express.Router();
 
-router.get("/count", async (req, res) => {
-  const locale = getRequestLocale(req);
-  try {
-    const total = await quotationService.countQuotations(req.query);
-    return res.json({ total });
-  } catch (error) {
-    return serverError(res, error, "quotations.list_failed", locale);
-  }
-});
-
-router.get("/", async (req, res) => {
-  const locale = getRequestLocale(req);
-  try {
-    const quotations = await quotationService.listQuotations(req.query);
-    return res.json({
-      data: quotations,
-      total: quotations.length
-    });
-  } catch (error) {
-    return serverError(res, error, "quotations.list_failed", locale);
-  }
-});
-
-router.get("/:id", async (req, res) => {
-  const locale = getRequestLocale(req);
-  try {
-    const quotation = await quotationService.getQuotationById(req.params.id);
-    return res.json(quotation);
-  } catch (error) {
-    if (error.statusCode === 404) {
-      return notFound(res, error.message, locale);
+  function validatePayload(req, res, locale) {
+    if (product && req.body.product !== undefined && req.body.product !== product) {
+      badRequest(res, [t("quotations.validation.product_mismatch", locale)], locale);
+      return null;
     }
-
-    return serverError(res, error, "quotations.fetch_failed", locale);
-  }
-});
-
-router.post("/", async (req, res) => {
-  const locale = getRequestLocale(req);
-  const validation = validateQuotationPayload(req.body, locale);
-
-  if (validation.errors) {
-    return badRequest(res, validation.errors, locale);
-  }
-
-  try {
-    const quotation = await quotationService.createQuotation(validation.data);
-    return res.status(201).json(quotation);
-  } catch (error) {
-    if (error.statusCode === 400) {
-      return badRequest(res, [t(error.message, locale)], locale);
+    const validation = validateQuotationPayload(product ? { ...req.body, product } : req.body, locale);
+    if (validation.errors) {
+      badRequest(res, validation.errors, locale);
+      return null;
     }
-
-    return serverError(res, error, "quotations.create_failed", locale);
-  }
-});
-
-router.put("/:id", async (req, res) => {
-  const locale = getRequestLocale(req);
-  const validation = validateQuotationPayload(req.body, locale);
-
-  if (validation.errors) {
-    return badRequest(res, validation.errors, locale);
+    return validation.data;
   }
 
-  try {
-    const quotation = await quotationService.updateQuotation(req.params.id, validation.data);
-    return res.json(quotation);
-  } catch (error) {
-    if (error.statusCode === 404) {
-      return notFound(res, error.message, locale);
+  router.get("/count", async (req, res) => {
+    const locale = getRequestLocale(req);
+    try {
+      const total = await quotationService.countQuotations(product ? { ...req.query, product } : req.query);
+      return res.json({ total });
+    } catch (error) {
+      return serverError(res, error, "quotations.list_failed", locale);
     }
+  });
 
-    if (error.statusCode === 400) {
-      return badRequest(res, [t(error.message, locale)], locale);
+  router.get("/", async (req, res) => {
+    const locale = getRequestLocale(req);
+    try {
+      const quotations = await quotationService.listQuotations(product ? { ...req.query, product } : req.query);
+      return res.json({
+        data: quotations,
+        total: quotations.length
+      });
+    } catch (error) {
+      return serverError(res, error, "quotations.list_failed", locale);
     }
+  });
 
-    return serverError(res, error, "quotations.update_failed", locale);
-  }
-});
+  router.get("/:id", async (req, res) => {
+    const locale = getRequestLocale(req);
+    try {
+      const quotation = await quotationService.getQuotationById(req.params.id, product);
+      return res.json(quotation);
+    } catch (error) {
+      if (error.statusCode === 404) {
+        return notFound(res, error.message, locale);
+      }
 
-router.delete("/:id", async (req, res) => {
-  const locale = getRequestLocale(req);
-  try {
-    await quotationService.deactivateQuotation(req.params.id);
-    return res.json({ message: t("quotations.deactivated_success", locale) });
-  } catch (error) {
-    if (error.statusCode === 404) {
-      return notFound(res, error.message, locale);
+      return serverError(res, error, "quotations.fetch_failed", locale);
     }
+  });
 
-    return serverError(res, error, "quotations.deactivate_failed", locale);
-  }
-});
+  router.post("/", async (req, res) => {
+    const locale = getRequestLocale(req);
+    const data = validatePayload(req, res, locale);
+    if (!data) return;
 
-router.patch("/:id/activate", async (req, res) => {
-  const locale = getRequestLocale(req);
-  try {
-    await quotationService.activateQuotation(req.params.id);
-    return res.json({ message: t("quotations.activated_success", locale) });
-  } catch (error) {
-    if (error.statusCode === 404) {
-      return notFound(res, error.message, locale);
+    try {
+      const quotation = await quotationService.createQuotation(data);
+      return res.status(201).json(quotation);
+    } catch (error) {
+      if (error.statusCode === 400) {
+        return badRequest(res, [t(error.message, locale)], locale);
+      }
+
+      return serverError(res, error, "quotations.create_failed", locale);
     }
+  });
 
-    return serverError(res, error, "quotations.activate_failed", locale);
-  }
-});
+  router.put("/:id", async (req, res) => {
+    const locale = getRequestLocale(req);
+    const data = validatePayload(req, res, locale);
+    if (!data) return;
 
-module.exports = router;
+    try {
+      const quotation = await quotationService.updateQuotation(req.params.id, data, product);
+      return res.json(quotation);
+    } catch (error) {
+      if (error.statusCode === 404) {
+        return notFound(res, error.message, locale);
+      }
+
+      if (error.statusCode === 400) {
+        return badRequest(res, [t(error.message, locale)], locale);
+      }
+
+      return serverError(res, error, "quotations.update_failed", locale);
+    }
+  });
+
+  router.delete("/:id", async (req, res) => {
+    const locale = getRequestLocale(req);
+    try {
+      await quotationService.deactivateQuotation(req.params.id, product);
+      return res.json({ message: t("quotations.deactivated_success", locale) });
+    } catch (error) {
+      if (error.statusCode === 404) {
+        return notFound(res, error.message, locale);
+      }
+
+      return serverError(res, error, "quotations.deactivate_failed", locale);
+    }
+  });
+
+  router.patch("/:id/activate", async (req, res) => {
+    const locale = getRequestLocale(req);
+    try {
+      await quotationService.activateQuotation(req.params.id, product);
+      return res.json({ message: t("quotations.activated_success", locale) });
+    } catch (error) {
+      if (error.statusCode === 404) {
+        return notFound(res, error.message, locale);
+      }
+
+      return serverError(res, error, "quotations.activate_failed", locale);
+    }
+  });
+
+
+  return router;
+}
+
+module.exports = createQuotationRouter();
+module.exports.createQuotationRouter = createQuotationRouter;

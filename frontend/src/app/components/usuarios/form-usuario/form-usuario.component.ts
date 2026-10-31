@@ -10,6 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UsuarioService } from '../../../core/services/usuario.service';
+import { mensagemValidacaoApi } from '../../../core/utils/mensagem-validacao-api';
 
 @Component({
   selector: 'app-form-usuario',
@@ -100,9 +101,9 @@ export class FormUsuarioComponent implements OnInit {
         });
       }
       this.router.navigate(['/usuarios']);
-    } catch {
-      this.snackBar.open('Erro ao salvar usuário.', 'Fechar', {
-        duration: 3000,
+    } catch (erro) {
+      this.snackBar.open(mensagemValidacaoApi(erro) ?? 'Erro ao salvar usuário.', 'Fechar', {
+        duration: 8000,
         panelClass: 'snack-erro',
       });
     } finally {

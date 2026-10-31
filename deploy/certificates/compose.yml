@@ -1,0 +1,38 @@
+name: cotacao-certificates
+
+services:
+  acme-dns:
+    image: joohoi/acme-dns:v2.0.2@sha256:8d327df58b1c9f6361c76734f9761a108fa4f12cf7ca94440a0404a28f75de62
+    restart: unless-stopped
+    environment:
+      GOMEMLIMIT: 48MiB
+    ports:
+      # Vincule ao IP privado da VNIC para preservar o resolvedor local do Ubuntu.
+      - "${ACME_DNS_BIND_IP:?Informe o IP privado da VM}:53:53/tcp"
+      - "${ACME_DNS_BIND_IP:?Informe o IP privado da VM}:53:53/udp"
+      # Administração acessível apenas pela própria VM e pela rede do Caddy.
+      - "127.0.0.1:8053:8080"
+    volumes:
+      - ./config.cfg:/etc/acme-dns/config.cfg:ro
+      - acme-dns-data:/var/lib/acme-dns
+    networks:
+      - validation
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    mem_limit: 64m
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+networks:
+  validation:
+    name: cotacao-acme-validation
+
+volumes:
+  acme-dns-data:
+    name: cotacao-acme-dns-data

@@ -1,34 +1,84 @@
 name: Deploy Production
 
 on:
-  push:
-    branches:
-      - master
+  workflow_run:
+    workflows: [CI]
+    branches: [master]
+    types: [completed]
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
 
 jobs:
   deploy-prod:
-    name: Deploy produção
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'master' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
     runs-on: ubuntu-latest
-
+    timeout-minutes: 30
+    env:
+      RELEASE: ${{ github.event.workflow_run.head_sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+      IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
+      PROD_HOST: ${{ secrets.PROD_HOST }}
+      PROD_USER: ${{ secrets.PROD_USER }}
+      PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
     steps:
-      - name: Deploy na VM via SSH
-        uses: appleboy/ssh-action@v1.2.0
+      - name: Checkout do commit aprovado no CI
+        uses: actions/checkout@v4
         with:
-          host: ${{ secrets.PROD_HOST }}
-          username: ${{ secrets.PROD_USER }}
-          key: ${{ secrets.PROD_SSH_KEY }}
-          port: ${{ secrets.PROD_SSH_PORT }}
-          script: |
-            set -e
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
 
-            cd ~/projects/cotacao/prod
+      - name: Gerar imagens fora da VM
+        run: |
+          docker build --target production -t "cotacao-backend:$IMAGE_TAG" backend
+          docker build -t "cotacao-frontend:$IMAGE_TAG" frontend
+          docker build -t "cotacao-proxy:$IMAGE_TAG" deploy/caddy
+          mkdir -p bundle/scripts bundle/database
+          docker save "cotacao-backend:$IMAGE_TAG" "cotacao-frontend:$IMAGE_TAG" "cotacao-proxy:$IMAGE_TAG" | gzip > bundle/images.tar.gz
+          cp docker-compose.prod.yml docker-compose.wildcard.yml bundle/
+          cp -R deploy bundle/
+          cp -R database/migrations bundle/database/
+          cp scripts/deploy-prod.sh scripts/setup-wildcard.py scripts/check-wildcard-dns.py bundle/scripts/
+          printf 'BACKEND_IMAGE=cotacao-backend:%s\nFRONTEND_IMAGE=cotacao-frontend:%s\nPROXY_IMAGE=cotacao-proxy:%s\n' "$IMAGE_TAG" "$IMAGE_TAG" "$IMAGE_TAG" > bundle/images.env
+          tar -czf release.tar.gz -C bundle .
 
-            git fetch origin
-            git checkout master
-            git reset --hard origin/master
+      - name: Configurar SSH com chave exclusiva do deploy
+        env:
+          SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.PROD_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_deploy ~/.ssh/known_hosts
+          test -n "$KNOWN_HOSTS"
 
-            cp .env.prod.example .env
+      - name: Enviar e implantar na VM
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          latest=$(gh api "repos/$GITHUB_REPOSITORY/commits/master" --jq .sha)
+          if [[ "$latest" != "$IMAGE_TAG" ]]; then
+            echo 'Existe um commit mais recente em master; esta execução não será implantada.'
+            exit 0
+          fi
+          port="${PROD_SSH_PORT:-22}"
+          remote="$PROD_USER@$PROD_HOST"
+          options=(-i "$HOME/.ssh/id_deploy" -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20)
+          ssh "${options[@]}" -p "$port" "$remote" "mkdir -p projects/cotacao/prod/releases/$RELEASE"
+          scp "${options[@]}" -P "$port" release.tar.gz "$remote:projects/cotacao/prod/releases/$RELEASE/release.tar.gz"
+          ssh "${options[@]}" -p "$port" "$remote" "set -eu; cd projects/cotacao/prod/releases/$RELEASE; tar -xzf release.tar.gz; docker load -i images.tar.gz; bash scripts/deploy-prod.sh \"\$PWD\"; rm images.tar.gz release.tar.gz"
 
-            docker compose up -d --build --remove-orphans
-
-            docker image prune -f
+      - name: Remover chave do runner
+        if: always()
+        run: rm -f ~/.ssh/id_deploy

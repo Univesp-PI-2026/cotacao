@@ -15,7 +15,7 @@ const mockCustomerApi = {
 describe('ClienteService', () => {
   let service: ClienteService;
   let httpMock: HttpTestingController;
-  const url = `${environment.apiUrl}/v1/customers`;
+  const url = `${environment.apiUrl}/v1/insureds`;
 
   beforeEach(() => {
     TestBed.configureTestingModule({

@@ -1,0 +1,124 @@
+name: cotacao-prod
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  proxy:
+    image: caddy:2.11.7-alpine
+    restart: unless-stopped
+    environment:
+      HTTPS_DOMAIN: ${HTTPS_DOMAIN:?Configure HTTPS_DOMAIN}
+      GOMEMLIMIT: 96MiB
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      frontend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:2019/config/"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+    mem_limit: 128m
+    logging: *logging
+
+  frontend:
+    image: ${FRONTEND_IMAGE:?Informe FRONTEND_IMAGE}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-4200}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/api/health/db"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+    mem_limit: 64m
+    logging: *logging
+
+  backend:
+    image: ${BACKEND_IMAGE:?Informe BACKEND_IMAGE}
+    restart: unless-stopped
+    environment:
+      APP_ENV: prod
+      NODE_ENV: production
+      NODE_OPTIONS: --max-old-space-size=96
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-quotation_prod}
+      DB_USER: ${DB_USER:-quotation_user}
+      DB_PASSWORD: ${DB_PASSWORD:?Configure DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?Configure JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-2h}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health/db').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+    mem_limit: 192m
+    logging: *logging
+
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    command:
+      - --innodb-buffer-pool-size=128M
+      - --performance-schema=OFF
+      - --max-connections=30
+      - --table-open-cache=200
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Configure DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME:-quotation_prod}
+      MYSQL_USER: ${DB_USER:-quotation_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Configure DB_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_ROOT_PASSWORD\" mysqladmin ping -h 127.0.0.1 -uroot --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    mem_limit: 448m
+    logging: *logging
+
+  migrate:
+    image: flyway/flyway:12.4-alpine
+    environment:
+      JAVA_TOOL_OPTIONS: -Xmx128m
+      FLYWAY_URL: jdbc:mysql://db:3306/${DB_NAME:-quotation_prod}?useSSL=false&allowPublicKeyRetrieval=true
+      FLYWAY_USER: ${DB_USER:-quotation_user}
+      FLYWAY_PASSWORD: ${DB_PASSWORD:?Configure DB_PASSWORD}
+      FLYWAY_CONNECT_RETRIES: 60
+      FLYWAY_VALIDATE_MIGRATION_NAMING: "true"
+      FLYWAY_LOCATIONS: filesystem:/flyway/sql/common,filesystem:/flyway/sql/prod
+    command: migrate
+    volumes:
+      - ./database/migrations:/flyway/sql:ro
+    mem_limit: 256m
+    logging: *logging
+
+volumes:
+  mysql-data:
+    name: cotacao-prod-mysql
+  caddy-data:
+    name: cotacao-prod-caddy-data
+  caddy-config:
+    name: cotacao-prod-caddy-config

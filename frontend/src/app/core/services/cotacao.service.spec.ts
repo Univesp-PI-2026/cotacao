@@ -36,6 +36,66 @@ describe('CotacaoService', () => {
 
   it('deve ser criado', () => expect(service).toBeTruthy());
 
+  it('cria cotação residencial pela API do produto', async () => {
+    const promise = service.criar({ produto: 'home', clienteId: 1, clienteNome: '', clienteCpf: '', clienteEmail: '',
+      dataSolicitacao: '2026-10-31', tipoSeguro: 'novo', temSeguradoraPreferida: false, ativo: true,
+      cepImovel: '01310100', logradouroImovel: 'Paulista', numeroImovel: '100', bairroImovel: 'Bela Vista', cidadeImovel: 'São Paulo', estadoImovel: 'SP' });
+    const req = httpMock.expectOne(`${url}/home`);
+    expect(req.request.body.product).toBe('home');
+    req.flush({ ...mockQuotationApi, product: 'home' });
+    expect((await promise).produto).toBe('home');
+  });
+
+  it('exclui pela API do produto quando informado', async () => {
+    const promise = service.excluir(1, 'credit_card');
+    const req = httpMock.expectOne(`${url}/credit-card/1`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush({});
+    await promise;
+  });
+
+  it('usa a API geral para trocar o produto de uma cotação existente', async () => {
+    const promise = service.atualizar(1, { produto: 'credit_card', rendaMensal: 5000, profissao: 'Professora' });
+    httpMock.expectOne(`${url}/1`).flush(mockQuotationApi);
+    await new Promise<void>(resolve => setTimeout(resolve, 0));
+    const req = httpMock.expectOne(`${url}/1`);
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body.product).toBe('credit_card');
+    req.flush({ ...mockQuotationApi, product: 'credit_card', monthly_income: '5000.00', occupation: 'Professora' });
+    expect((await promise).produto).toBe('credit_card');
+  });
+
+  it('considera cotações antigas como automóvel', async () => {
+    const promise = service.listar();
+    httpMock.expectOne(url).flush({ data: [mockQuotationApi], total: 1 });
+    expect((await promise)[0].produto).toBe('auto');
+  });
+
+  it('recupera endereço residencial e formata a data para edição', async () => {
+    const promise = service.buscarPorId(1);
+    httpMock.expectOne(`${url}/1`).flush({
+      ...mockQuotationApi, product: 'home', request_date: '2026-10-31T00:00:00.000Z',
+      property_zipcode: '01310100', property_street: 'Paulista', property_number: '100',
+      property_complement: 'Apto 12', property_district: 'Bela Vista', property_city: 'São Paulo', property_state: 'SP',
+    });
+    expect(await promise).toEqual(jasmine.objectContaining({ produto: 'home', dataSolicitacao: '2026-10-31',
+      cepImovel: '01310100', logradouroImovel: 'Paulista', numeroImovel: '100', complementoImovel: 'Apto 12',
+      bairroImovel: 'Bela Vista', cidadeImovel: 'São Paulo', estadoImovel: 'SP' }));
+  });
+
+  it('envia e recupera os dados de cartão sem campos de outros produtos', async () => {
+    const promise = service.criar({
+      produto: 'credit_card', clienteId: 1, clienteNome: '', clienteCpf: '', clienteEmail: '',
+      dataSolicitacao: '2026-10-31', tipoSeguro: 'novo', temSeguradoraPreferida: true,
+      ativo: true, rendaMensal: 4500.75, profissao: 'Professora', placaVeiculo: 'ABC1234', cepImovel: '01310100',
+    });
+    const req = httpMock.expectOne(`${url}/credit-card`);
+    expect(req.request.body).toEqual(jasmine.objectContaining({ product: 'credit_card', monthly_income: 4500.75,
+      occupation: 'Professora', vehicle_plate: null, property_zipcode: null, insurance_type: null, has_insurer_preference: 0 }));
+    req.flush({ ...mockQuotationApi, product: 'credit_card', monthly_income: '4500.75', occupation: 'Professora' });
+    expect(await promise).toEqual(jasmine.objectContaining({ produto: 'credit_card', rendaMensal: 4500.75, profissao: 'Professora' }));
+  });
+
   it('listar mapeia insurance_type=0 para "novo"', async () => {
     const promise = service.listar();
     httpMock.expectOne(url).flush({ data: [mockQuotationApi], total: 1 });
@@ -68,7 +128,7 @@ describe('CotacaoService', () => {
       anoFabricacao: 2020, cepPernoite: '20040020', idadeCondutor: 30,
       tempoHabilitacao: 'Mais de 10 anos', temSeguradoraPreferida: false, ativo: true,
     });
-    const req = httpMock.expectOne(url);
+    const req = httpMock.expectOne(`${url}/auto`);
     expect(req.request.body['insurance_type']).toBe(1);
     expect(req.request.body['bonus_class']).toBe('7');
     req.flush({ ...mockQuotationApi, id: 2 });
@@ -109,7 +169,7 @@ describe('CotacaoService', () => {
       tempoHabilitacao: '5 a 10 anos', coberturas: 'RCF, CASCO',
       temSeguradoraPreferida: true, seguradoraPreferida: 'Porto Seguro', ativo: true,
     });
-    const req = httpMock.expectOne(url);
+    const req = httpMock.expectOne(`${url}/auto`);
     expect(req.request.body['insurance_type']).toBe(0);
     expect(req.request.body['has_claims']).toBe(1);
     expect(req.request.body['coverages']).toEqual(['RCF', 'CASCO']);
@@ -127,7 +187,7 @@ describe('CotacaoService', () => {
       anoFabricacao: 2022, cepPernoite: '01310100', idadeCondutor: 39,
       tempoHabilitacao: '5 a 10 anos', temSeguradoraPreferida: false, ativo: true,
     });
-    const req = httpMock.expectOne(url);
+    const req = httpMock.expectOne(`${url}/auto`);
     expect(req.request.body['has_claims']).toBeNull();
     expect(req.request.body['bonus_class']).toBeNull();
     expect(req.request.body['preferred_insurer']).toBeNull();
@@ -145,7 +205,7 @@ describe('CotacaoService', () => {
     const promise = service.atualizar(1, { marca: 'Honda' });
     httpMock.expectOne(`${url}/1`).flush(mockQuotationApi);
     await new Promise<void>(r => setTimeout(r, 0));
-    httpMock.expectOne(`${url}/1`).flush({ ...mockQuotationApi, vehicle_brand: 'Honda' });
+    httpMock.expectOne(`${url}/auto/1`).flush({ ...mockQuotationApi, vehicle_brand: 'Honda' });
     expect((await promise).marca).toBe('Honda');
   });
 
