@@ -14,7 +14,8 @@ function createQuotationsService(repository = quotationRepository) {
 
     return repository.findAll({
       active,
-      customer_id: Number.isNaN(customerId) ? undefined : customerId
+      customer_id: Number.isNaN(customerId) ? undefined : customerId,
+      ...(query.product !== undefined ? { product: query.product } : {})
     });
   }
 
@@ -25,14 +26,15 @@ function createQuotationsService(repository = quotationRepository) {
 
     return repository.count({
       active,
-      customer_id: Number.isNaN(customerId) ? undefined : customerId
+      customer_id: Number.isNaN(customerId) ? undefined : customerId,
+      ...(query.product !== undefined ? { product: query.product } : {})
     });
   }
 
-  async function getQuotationById(id) {
-    const quotation = await repository.findById(id);
+  async function getQuotationById(id, product) {
+    const quotation = await repository.findById(id, product);
 
-    if (!quotation) {
+    if (!quotation || (product && quotation.product !== product)) {
       throw createError("quotations.not_found", 404);
     }
 
@@ -54,28 +56,25 @@ function createQuotationsService(repository = quotationRepository) {
     return repository.findById(quotationId);
   }
 
-  async function updateQuotation(id, data) {
-    const existingQuotation = await repository.findById(id);
-
-    if (!existingQuotation) {
-      throw createError("quotations.not_found", 404);
-    }
+  async function updateQuotation(id, data, product) {
+    await getQuotationById(id, product);
 
     await ensureCustomer(data.customer_id);
-    await repository.update(id, data);
+    const updated = await repository.update(id, data, product);
+    if (updated === false) throw createError("quotations.not_found", 404);
     return repository.findById(id);
   }
 
-  async function activateQuotation(id) {
-    const affectedRows = await repository.updateActiveStatus(id, 1);
+  async function activateQuotation(id, product) {
+    const affectedRows = await repository.updateActiveStatus(id, 1, product);
 
     if (affectedRows === 0) {
       throw createError("quotations.not_found", 404);
     }
   }
 
-  async function deactivateQuotation(id) {
-    const affectedRows = await repository.updateActiveStatus(id, 0);
+  async function deactivateQuotation(id, product) {
+    const affectedRows = await repository.updateActiveStatus(id, 0, product);
 
     if (affectedRows === 0) {
       throw createError("quotations.not_found", 404);

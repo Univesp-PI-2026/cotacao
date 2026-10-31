@@ -274,7 +274,7 @@ test.describe("customers routes", () => {
       assert.equal(response.status, 400);
       assert.deepEqual(body, {
         message: "Dados invalidos",
-        errors: ["Email, CPF ou RNM ja existe"]
+        errors: ["Já existe um cliente com esses dados. Verifique o e-mail, CPF e RNM."]
       });
     } finally {
       await server.close();
@@ -589,7 +589,7 @@ test.describe("customers routes", () => {
       assert.equal(response.status, 400);
       assert.deepEqual(body, {
         message: "Dados invalidos",
-        errors: ["Email, CPF ou RNM ja existe"]
+        errors: ["Já existe um cliente com esses dados. Verifique o e-mail, CPF e RNM."]
       });
     } finally {
       await server.close();

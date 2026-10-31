@@ -1,27 +1,72 @@
-.secoes-form {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
+:host {
+  display: block;
+  min-width: 0;
+  container-type: inline-size;
+  --produto-cor: #3949ab;
+  --produto-fundo: rgb(57 73 171 / 7%);
+}
 
-  @media (min-width: 900px) {
-    grid-template-columns: repeat(3, 1fr);
-    align-items: start;
-  }
+:host-context(.tema-escuro) {
+  --produto-cor: #9fa8da;
+  --produto-fundo: rgb(159 168 218 / 10%);
+}
+
+.pagina-conteudo {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.cabecalho-secao {
+  align-items: flex-end;
+  margin-bottom: 24px;
+
+  h2 { font-size: 1.75rem; font-weight: 600; }
+}
+
+.pagina-descricao,
+.ajuda-endereco {
+  margin: 10px 0 20px;
+  color: var(--texto-secundario);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.pagina-descricao { margin-bottom: 0; }
+.campos-obrigatorios { color: var(--texto-secundario); font-size: 0.8rem; }
+
+.secoes-form,
+.produtos,
+.campos-imovel,
+.preferencias-campos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+.form-secao {
+  min-width: 0;
+  margin-bottom: 0;
+  padding: 24px;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 4%);
 }
 
 .info-cliente {
   margin-bottom: 16px;
-  background: linear-gradient(135deg, rgba(57, 73, 171, 0.05) 0%, rgba(57, 73, 171, 0.02) 100%);
-  border-left: 4px solid #3949ab;
+  border-left: 4px solid var(--produto-cor);
 
   h3 {
-    color: #3949ab;
-    border-bottom-color: transparent;
     margin-bottom: 12px;
+    padding-bottom: 0;
+    border-bottom: 0;
   }
 }
 
 .campo-readonly {
+  min-width: 0;
+  overflow-wrap: anywhere;
+
   label {
     display: block;
     font-size: 0.75rem;
@@ -42,10 +87,88 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  line-height: 1.5;
+  border-bottom: 1px solid var(--borda);
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+  color: var(--produto-cor);
 
   mat-icon {
-    font-size: 1.1rem;
-    width: 1.1rem;
-    height: 1.1rem;
+    flex-shrink: 0;
   }
+}
+
+.selecao-produto { margin-bottom: 24px; }
+
+.produto-opcao {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 18px 16px;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover { border-color: var(--produto-cor); }
+  &:focus-visible { outline: 2px solid var(--produto-cor); outline-offset: 3px; }
+  &.selecionado { border-color: var(--produto-cor); background: var(--produto-fundo); }
+  > mat-icon { flex-shrink: 0; color: var(--produto-cor); }
+  .produto-check { font-size: 20px; width: 20px; height: 20px; }
+}
+
+.produto-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  line-height: 1.4;
+
+  strong { font-size: 0.95rem; font-weight: 500; }
+  > span { color: var(--texto-secundario); font-size: 0.8rem; }
+}
+
+mat-form-field { min-width: 0; width: 100%; margin-bottom: 16px; }
+.form-linha { grid-template-columns: minmax(0, 1fr); }
+.campos-imovel, .preferencias-campos { gap: 0 16px; }
+.preferencias-seguro { grid-column: 1 / -1; }
+.preferencias-campos > :last-child { grid-column: 1 / -1; }
+.cabecalho-imovel button { min-height: 48px; height: auto; padding: 12px 16px; white-space: normal; line-height: 1.4; }
+
+.acoes-form {
+  justify-content: space-between;
+  padding: 20px 0 8px;
+  border-top: 1px solid var(--borda);
+
+  a, button { min-height: 48px; padding: 0 24px; }
+}
+
+@container (min-width: 640px) {
+  .produtos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .form-linha, .preferencias-campos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .campos-imovel { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .campo-cep, .campo-complemento { grid-column: 1 / -1; }
+  .campo-logradouro { grid-column: span 4; }
+  .campo-numero, .campo-bairro, .campo-cidade, .campo-estado { grid-column: span 2; }
+}
+
+@container (min-width: 1008px) {
+  .secoes-form { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+  .secoes-form.residencial { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+}
+
+@container (max-width: 639px) {
+  .form-secao { padding: 20px 16px; }
+  .form-linha-3 { grid-template-columns: minmax(0, 1fr); }
+  .cabecalho-secao h2 { font-size: 1.5rem; }
+}
+
+@container (max-width: 479px) {
+  .acoes-form { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .cabecalho-imovel button { width: 100%; }
 }

@@ -11,7 +11,7 @@
   <mat-form-field appearance="outline" class="campo-busca">
     <mat-label>Buscar cotação</mat-label>
     <mat-icon matPrefix>search</mat-icon>
-    <input matInput [(ngModel)]="termoBusca" (ngModelChange)="filtrar()" placeholder="Cliente, placa, marca..." />
+    <input matInput [(ngModel)]="termoBusca" (ngModelChange)="filtrar()" placeholder="Cliente, produto, placa, cidade..." />
     @if (termoBusca) {
       <button mat-icon-button matSuffix (click)="termoBusca = ''; filtrar()">
         <mat-icon>close</mat-icon>
@@ -36,21 +36,36 @@
           <mat-card-content class="card-conteudo">
             <div class="card-info">
               <div class="icone-cotacao">
-                <mat-icon>description</mat-icon>
+                <mat-icon>{{ iconeProduto(cotacao.produto) }}</mat-icon>
               </div>
               <div class="dados-cotacao">
                 <div class="linha-principal">
                   <p class="nome-cliente">{{ cotacao.clienteNome }}</p>
+                  <span class="badge-produto">{{ rotulaProduto(cotacao.produto) }}</span>
+                  @if (cotacao.produto !== 'credit_card') {
                   <span class="badge-tipo" [class.renovacao]="cotacao.tipoSeguro === 'renovacao'">
                     {{ rotulaTipoSeguro(cotacao.tipoSeguro) }}
                   </span>
+                  }
                 </div>
                 <div class="grid-detalhes">
-                  <span><strong>CPF:</strong> {{ cotacao.clienteCpf }}</span>
+                  @if (cotacao.clienteCpf) { <span><strong>CPF:</strong> {{ cotacao.clienteCpf }}</span> }
+                  @if (!cotacao.produto || cotacao.produto === 'auto') {
                   <span><strong>Placa:</strong> {{ cotacao.placaVeiculo }}</span>
                   <span><strong>Veículo:</strong> {{ cotacao.marca }} {{ cotacao.modelo }}</span>
-                  <span><strong>Ano:</strong> {{ cotacao.anoFabricacao }}</span>
+                  }
+                  @if (cotacao.produto === 'home') {
+                    <span><strong>Imóvel:</strong> {{ cotacao.logradouroImovel }}, {{ cotacao.numeroImovel }}</span>
+                    <span><strong>Cidade:</strong> {{ cotacao.cidadeImovel }} / {{ cotacao.estadoImovel }}</span>
+                  }
+                  @if (cotacao.produto === 'credit_card') {
+                    <span><strong>Renda mensal:</strong> {{ formatarRenda(cotacao.rendaMensal) }}</span>
+                    <span><strong>Profissão:</strong> {{ cotacao.profissao }}</span>
+                  }
                   <span><strong>Solicitação:</strong> {{ cotacao.dataSolicitacao }}</span>
+                  @if (!cotacao.produto || cotacao.produto === 'auto') {
+                    <span><strong>Ano:</strong> {{ cotacao.anoFabricacao }}</span>
+                  }
                 </div>
               </div>
             </div>

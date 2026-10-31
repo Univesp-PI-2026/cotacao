@@ -1,3 +1,7 @@
+.layout-auth {
+  box-sizing: border-box;
+}
+
 .card-header {
   flex-direction: column;
   align-items: center;
@@ -6,23 +10,17 @@
 }
 
 .logo-auth {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 4px;
+  width: min(220px, 100%);
+  margin: 0 auto 16px;
+  padding: 12px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  background: #ffffff;
 
-  .logo-icone {
-    font-size: 2.2rem;
-    width: 2.2rem;
-    height: 2.2rem;
-    color: #3949ab;
-  }
-
-  .logo-nome {
-    margin: 0;
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: #3949ab;
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
   }
 }
 

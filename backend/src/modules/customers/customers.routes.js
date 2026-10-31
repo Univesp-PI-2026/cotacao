@@ -4,6 +4,7 @@ const customerService = require("./customers.service");
 const { validateCustomerPayload } = require("./customers.validator");
 const { badRequest, notFound, serverError } = require("../../utils/http");
 const { getRequestLocale, t } = require("../../utils/i18n");
+const { duplicateEntryMessage } = require("../../utils/duplicate-entry");
 
 const router = express.Router();
 
@@ -57,7 +58,7 @@ router.post("/", async (req, res) => {
     return res.status(201).json(customer);
   } catch (error) {
     if (error.code === "ER_DUP_ENTRY") {
-      return badRequest(res, [t("customers.duplicate_unique_fields", locale)], locale);
+      return badRequest(res, [duplicateEntryMessage(error, locale, "customers.duplicate_unique_fields")], locale);
     }
 
     return serverError(res, error, "customers.create_failed", locale);
@@ -81,7 +82,7 @@ router.put("/:id", async (req, res) => {
     }
 
     if (error.code === "ER_DUP_ENTRY") {
-      return badRequest(res, [t("customers.duplicate_unique_fields", locale)], locale);
+      return badRequest(res, [duplicateEntryMessage(error, locale, "customers.duplicate_unique_fields")], locale);
     }
 
     return serverError(res, error, "customers.update_failed", locale);

@@ -1,0 +1,8 @@
+{
+	servers {
+		protocols h1 h2
+	}
+}
+
+# Os sites habilitados persistem na VM, independentemente da release da aplicação.
+import /etc/caddy/sites.caddy

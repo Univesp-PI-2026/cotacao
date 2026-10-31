@@ -6,6 +6,9 @@ const pool = require("./db");
 const authRoutes = require("./modules/auth/auth.routes");
 const customerRoutes = require("./modules/customers/customers.routes");
 const quotationRoutes = require("./modules/quotations/quotations.routes");
+const autoQuotationRoutes = require("./modules/quotations/auto/auto.routes");
+const homeQuotationRoutes = require("./modules/quotations/home/home.routes");
+const creditCardQuotationRoutes = require("./modules/quotations/credit-card/credit-card.routes");
 const roleRoutes = require("./modules/roles/roles.routes");
 const userRoutes = require("./modules/users/users.routes");
 const zipCodeRoutes = require("./modules/zip-codes/zip-codes.routes");
@@ -25,6 +28,17 @@ function createApp() {
         "GET /health",
         "GET /health/db",
         "POST /v1/auth/login",
+        "GET /v1/insureds",
+        "GET /v1/insureds/:id",
+        "POST /v1/insureds",
+        "PUT /v1/insureds/:id",
+        "DELETE /v1/insureds/:id",
+        "GET /v1/quotations/auto",
+        "POST /v1/quotations/auto",
+        "GET /v1/quotations/home",
+        "POST /v1/quotations/home",
+        "GET /v1/quotations/credit-card",
+        "POST /v1/quotations/credit-card",
         "GET /v1/customers",
         "GET /v1/roles",
         "GET /v1/roles/:id",
@@ -81,8 +95,12 @@ function createApp() {
   });
 
   app.use("/v1/auth", authRoutes);
+  app.use("/v1/insureds", requireAuth, customerRoutes);
   app.use("/v1/customers", requireAuth, customerRoutes);
   app.use("/v1/zip-codes", requireAuth, zipCodeRoutes);
+  app.use("/v1/quotations/auto", requireAuth, autoQuotationRoutes);
+  app.use("/v1/quotations/home", requireAuth, homeQuotationRoutes);
+  app.use("/v1/quotations/credit-card", requireAuth, creditCardQuotationRoutes);
   app.use("/v1/quotations", requireAuth, quotationRoutes);
   app.use("/v1/roles", requireAuth, roleRoutes);
   app.use("/v1/users", requireAuth, userRoutes);

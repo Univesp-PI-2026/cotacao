@@ -12,6 +12,12 @@ function notFound(res, messageOrKey = "common.not_found", locale) {
 }
 
 function serverError(res, error, messageOrKey = "common.internal_server_error", locale) {
+  // Metadados de diagnóstico, sem SQL, parâmetros ou dados pessoais do cadastro.
+  console.error("request_failed", {
+    context: messageOrKey,
+    code: error.code || "UNEXPECTED_ERROR",
+    sqlState: error.sqlState
+  });
   return res.status(500).json({
     message: t(messageOrKey, locale),
     detail: error.message
