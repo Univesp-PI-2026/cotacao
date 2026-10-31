@@ -11,6 +11,11 @@ const {
 } = require("./test-helpers");
 
 const originalService = { ...quotationService };
+const emptyProductFields = {
+  product: "auto", property_zipcode: null, property_street: null, property_number: null,
+  property_complement: null, property_district: null, property_city: null, property_state: null,
+  monthly_income: null, occupation: null
+};
 
 function resetServiceMocks() {
   Object.assign(quotationService, originalService);
@@ -149,6 +154,7 @@ test.describe("quotations routes", () => {
   test("POST /v1/quotations validates and normalizes new policy payload", async () => {
     quotationService.createQuotation = async (payload) => {
       assert.deepEqual(payload, {
+        ...emptyProductFields,
         customer_id: 10,
         request_date: "2026-04-19",
         insurance_type: 0,
@@ -202,6 +208,7 @@ test.describe("quotations routes", () => {
   test("POST /v1/quotations validates and normalizes renewal payload", async () => {
     quotationService.createQuotation = async (payload) => {
       assert.deepEqual(payload, {
+        ...emptyProductFields,
         customer_id: 10,
         request_date: "2026-04-19",
         insurance_type: 1,
@@ -506,6 +513,7 @@ test.describe("quotations routes", () => {
     quotationService.updateQuotation = async (id, payload) => {
       assert.equal(id, "11");
       assert.deepEqual(payload, {
+        ...emptyProductFields,
         customer_id: 10,
         request_date: "2026-04-19",
         insurance_type: 0,

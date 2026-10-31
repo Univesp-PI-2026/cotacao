@@ -1,0 +1,23 @@
+{
+	servers {
+		protocols h1 h2
+	}
+}
+
+{$HTTPS_DOMAIN} {
+	tls {
+		issuer acme {
+			dir https://acme-v02.api.letsencrypt.org/directory
+		}
+	}
+
+	encode zstd gzip
+
+	handle_path /api/* {
+		reverse_proxy backend:3000
+	}
+
+	handle {
+		reverse_proxy frontend:80
+	}
+}

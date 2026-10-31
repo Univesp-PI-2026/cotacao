@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -11,6 +12,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ClienteService } from '../../../core/services/cliente.service';
 import { CepService } from '../../../core/services/cep.service';
+import { mensagemValidacaoApi } from '../../../core/utils/mensagem-validacao-api';
 
 const ESTADOS_BR = [
   'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG',
@@ -53,7 +55,7 @@ export class FormClienteComponent implements OnInit {
   ) {
     this.formulario = this.fb.group({
       nome: ['', [Validators.required, Validators.maxLength(255)]],
-      email: ['', [Validators.required, Validators.email]],
+      email: ['', [Validators.required, Validators.email, Validators.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)]],
       dataNascimento: ['', Validators.required],
       estrangeiro: [false, Validators.required],
       cpf: [''],
@@ -146,14 +148,31 @@ export class FormClienteComponent implements OnInit {
         });
       }
       this.router.navigate(['/clientes']);
-    } catch {
-      this.snackBar.open('Erro ao salvar cliente.', 'Fechar', {
-        duration: 3000,
+    } catch (erro) {
+      this.snackBar.open(this.mensagemErroSalvar(erro), 'Fechar', {
+        duration: 8000,
         panelClass: 'snack-erro',
       });
     } finally {
       this.carregando = false;
     }
+  }
+
+  private mensagemErroSalvar(erro: unknown): string {
+    if (erro instanceof HttpErrorResponse) {
+      if (erro.status === 0) {
+        return 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.';
+      }
+      if (erro.status === 401) {
+        return 'Sua sessão expirou. Entre novamente para salvar o cliente.';
+      }
+      if (erro.status === 403) {
+        return 'Você não tem permissão para salvar este cliente.';
+      }
+      const validacao = mensagemValidacaoApi(erro);
+      if (validacao) return validacao;
+    }
+    return 'Erro ao salvar cliente. Tente novamente.';
   }
 
   get estrangeiro(): boolean {

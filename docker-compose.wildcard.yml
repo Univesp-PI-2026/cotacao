@@ -1,0 +1,16 @@
+# Aplicado pelo deploy quando HTTPS_WILDCARD_ENABLED=true no .env.prod da VM.
+services:
+  proxy:
+    image: ${PROXY_IMAGE:?Informe PROXY_IMAGE com o módulo acmedns}
+    volumes:
+      - ./deploy/Caddyfile.wildcard:/etc/caddy/Caddyfile:ro
+      - ${CERTIFICATE_ROOT:?Informe CERTIFICATE_ROOT}/acmedns.json:/etc/caddy/acmedns.json:ro
+      - ${CERTIFICATE_ROOT:?Informe CERTIFICATE_ROOT}/sites.caddy:/etc/caddy/sites.caddy:ro
+    networks:
+      - default
+      - certificate-validation
+
+networks:
+  certificate-validation:
+    external: true
+    name: cotacao-acme-validation

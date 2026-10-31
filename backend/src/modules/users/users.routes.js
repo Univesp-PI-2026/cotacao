@@ -2,6 +2,7 @@ const express = require("express");
 
 const { badRequest, notFound, serverError } = require("../../utils/http");
 const { getRequestLocale, t } = require("../../utils/i18n");
+const { duplicateEntryMessage } = require("../../utils/duplicate-entry");
 const userService = require("./users.service");
 const { validateUserPayload } = require("./users.validator");
 
@@ -61,7 +62,7 @@ router.post("/", async (req, res) => {
     }
 
     if (error.code === "ER_DUP_ENTRY") {
-      return badRequest(res, [t("users.duplicate_user_identity", locale)], locale);
+      return badRequest(res, [duplicateEntryMessage(error, locale, "users.duplicate_user_identity")], locale);
     }
 
     return serverError(res, error, "users.create_failed", locale);
@@ -89,7 +90,7 @@ router.put("/:id", async (req, res) => {
     }
 
     if (error.code === "ER_DUP_ENTRY") {
-      return badRequest(res, [t("users.duplicate_user_identity", locale)], locale);
+      return badRequest(res, [duplicateEntryMessage(error, locale, "users.duplicate_user_identity")], locale);
     }
 
     return serverError(res, error, "users.update_failed", locale);

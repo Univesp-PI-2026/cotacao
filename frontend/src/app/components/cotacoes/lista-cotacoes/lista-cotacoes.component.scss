@@ -18,14 +18,22 @@
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background-color: rgba(233, 30, 99, 0.12);
+  background-color: rgba(57, 73, 171, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 
   mat-icon {
-    color: #e91e63;
+    color: #3949ab;
+  }
+}
+
+:host-context(.tema-escuro) .icone-cotacao {
+  background-color: rgba(159, 168, 218, 0.12);
+
+  mat-icon {
+    color: #9fa8da;
   }
 }
 
@@ -47,6 +55,17 @@
     font-weight: 500;
   }
 }
+
+.badge-produto {
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: rgb(57 73 171 / 10%);
+  color: #3949ab;
+}
+
+:host-context(.tema-escuro) .badge-produto { color: #9fa8da; }
 
 .badge-tipo {
   display: inline-block;
@@ -75,18 +94,20 @@
 
 .grid-detalhes {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 2px 16px;
   font-size: 0.85rem;
   color: var(--texto-secundario);
 
   @media (min-width: 600px) {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   strong {
     color: inherit;
   }
+
+  span { overflow-wrap: anywhere; }
 }
 
 .card-acoes {

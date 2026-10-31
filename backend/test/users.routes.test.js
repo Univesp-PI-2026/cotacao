@@ -197,7 +197,7 @@ test.describe("users routes", () => {
       assert.equal(response.status, 400);
       assert.deepEqual(body, {
         message: "Dados invalidos",
-        errors: ["Ja existe um usuario com esse usuario ou email"]
+        errors: ["Já existe um usuário com esses dados. Verifique o login e o e-mail."]
       });
     } finally {
       await server.close();
@@ -490,7 +490,7 @@ test.describe("users routes", () => {
       assert.equal(response.status, 400);
       assert.deepEqual(body, {
         message: "Dados invalidos",
-        errors: ["Ja existe um usuario com esse usuario ou email"]
+        errors: ["Já existe um usuário com esses dados. Verifique o login e o e-mail."]
       });
     } finally {
       await server.close();

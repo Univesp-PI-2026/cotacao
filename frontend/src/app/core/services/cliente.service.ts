@@ -24,7 +24,7 @@ interface CustomerApi {
 
 @Injectable({ providedIn: 'root' })
 export class ClienteService {
-  private readonly url = `${environment.apiUrl}/v1/customers`;
+  private readonly url = `${environment.apiUrl}/v1/insureds`;
 
   constructor(private http: HttpClient) {}
 
