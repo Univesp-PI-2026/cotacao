@@ -52,7 +52,7 @@
 
         <mat-form-field appearance="outline" class="form-campo-full">
           <mat-label>Data da Solicitação</mat-label>
-          <input matInput type="date" formControlName="dataSolicitacao" />
+          <input matInput type="text" appDateMask formControlName="dataSolicitacao" placeholder="dd/mm/aaaa" inputmode="numeric" maxlength="10" />
           @if (formulario.get('dataSolicitacao')?.hasError('required') && formulario.get('dataSolicitacao')?.touched) {
             <mat-error>Data é obrigatória</mat-error>
           }

@@ -14,6 +14,7 @@ import { CotacaoService } from '../../../core/services/cotacao.service';
 import { ClienteService } from '../../../core/services/cliente.service';
 import { Cliente } from '../../../core/models/cliente.model';
 import { PRODUTOS_COTACAO, ProdutoCotacao } from '../../../core/models/cotacao.model';
+import { DateMaskDirective } from '../../../shared/directives/date-mask.directive';
 
 @Component({
   selector: 'app-form-cotacao',
@@ -30,6 +31,7 @@ import { PRODUTOS_COTACAO, ProdutoCotacao } from '../../../core/models/cotacao.m
     MatSelectModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
+    DateMaskDirective,
   ],
   templateUrl: './form-cotacao.component.html',
   styleUrl: './form-cotacao.component.scss',

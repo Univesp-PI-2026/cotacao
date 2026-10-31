@@ -49,6 +49,7 @@
               <div class="dados-cliente">
                 <p class="nome-cliente">{{ cliente.nome }}</p>
                 <p class="email-cliente">{{ cliente.email }}</p>
+                <p class="nascimento-cliente">Nascimento: {{ cliente.dataNascimento | dataBr }}</p>
                 @if (cliente.cpf) {
                   <p class="cpf-cliente">CPF: {{ cliente.cpf }}</p>
                 }
