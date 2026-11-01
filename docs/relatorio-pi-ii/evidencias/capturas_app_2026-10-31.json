@@ -1,0 +1,486 @@
+{
+  "version": "cópia de trabalho de 2026-10-31",
+  "capture_date": "2026-10-31",
+  "frontend": "Angular do repositório após remoção da tela de perfil",
+  "backend": "API Express do repositório",
+  "database": "MySQL 8.4 temporário; oito migrações aplicadas com Flyway 12.4",
+  "data": "Exclusivamente fictícios, criados pela API no banco temporário",
+  "screenshots": [
+    {
+      "file": "login.png",
+      "route": "/login",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "title": "Grupo05 Seguros",
+      "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+    },
+    {
+      "file": "painel.png",
+      "route": "/painel",
+      "viewport": {
+        "width": 1440,
+        "height": 976
+      },
+      "title": "Grupo05 Seguros",
+      "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+    },
+    {
+      "file": "lista_clientes.png",
+      "route": "/clientes",
+      "viewport": {
+        "width": 1440,
+        "height": 976
+      },
+      "title": "Grupo05 Seguros",
+      "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+    },
+    {
+      "file": "cadastro_cliente.png",
+      "route": "/clientes/1",
+      "viewport": {
+        "width": 1440,
+        "height": 976
+      },
+      "title": "Grupo05 Seguros",
+      "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+    },
+    {
+      "file": "lista_cotacoes.png",
+      "route": "/cotacoes",
+      "viewport": {
+        "width": 1440,
+        "height": 976
+      },
+      "title": "Grupo05 Seguros",
+      "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+    },
+    {
+      "file": "cotacao_auto.png",
+      "route": "/cotacoes/1",
+      "viewport": {
+        "width": 1440,
+        "height": 1637
+      },
+      "title": "Grupo05 Seguros",
+      "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+    },
+    {
+      "file": "cotacao_residencial.png",
+      "route": "/cotacoes/2",
+      "viewport": {
+        "width": 1440,
+        "height": 1529
+      },
+      "title": "Grupo05 Seguros",
+      "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+    },
+    {
+      "file": "cotacao_cartao.png",
+      "route": "/cotacoes/3",
+      "viewport": {
+        "width": 1440,
+        "height": 976
+      },
+      "title": "Grupo05 Seguros",
+      "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+    },
+    {
+      "file": "lista_usuarios.png",
+      "route": "/usuarios",
+      "viewport": {
+        "width": 1440,
+        "height": 976
+      },
+      "title": "Grupo05 Seguros",
+      "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+    },
+    {
+      "file": "cadastro_usuario.png",
+      "route": "/usuarios/novo",
+      "viewport": {
+        "width": 1440,
+        "height": 976
+      },
+      "title": "Grupo05 Seguros",
+      "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+    },
+    {
+      "file": "tema_escuro.png",
+      "route": "/painel",
+      "viewport": {
+        "width": 1440,
+        "height": 976
+      },
+      "title": "Grupo05 Seguros",
+      "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+    }
+  ],
+  "api_checks": [
+    {
+      "method": "GET",
+      "route": "/health/db",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "/v1/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/v1/roles",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/v1/users",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "/v1/users",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "route": "/v1/insureds",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "/v1/insureds",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "route": "/v1/insureds",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "route": "/v1/quotations",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "/v1/quotations/auto",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "route": "/v1/quotations/home",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "route": "/v1/quotations/credit-card",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "route": "/v1/quotations",
+      "status": 200
+    }
+  ],
+  "fonts": {
+    "icons": true,
+    "roboto": true
+  },
+  "page_errors": [],
+  "mobile": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "deviceScaleFactor": 2,
+    "description": "Navegação mobile com toque; capturas sequenciais da área rolável, sem modificar o HTML ou os estilos",
+    "screenshots": [
+      {
+        "file": "mobile_login_01.png",
+        "route": "/login",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 0,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      },
+      {
+        "file": "mobile_painel_01.png",
+        "route": "/painel",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 0,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      },
+      {
+        "file": "mobile_menu_01.png",
+        "route": "/painel",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 0,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      },
+      {
+        "file": "mobile_lista_clientes_01.png",
+        "route": "/clientes",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 0,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      },
+      {
+        "file": "mobile_cadastro_cliente_01.png",
+        "route": "/clientes/1",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 0,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      },
+      {
+        "file": "mobile_cadastro_cliente_02.png",
+        "route": "/clientes/1",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 464,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      },
+      {
+        "file": "mobile_cadastro_cliente_03.png",
+        "route": "/clientes/1",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 927,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      },
+      {
+        "file": "mobile_lista_cotacoes_01.png",
+        "route": "/cotacoes",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 0,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      },
+      {
+        "file": "mobile_lista_cotacoes_02.png",
+        "route": "/cotacoes",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 126,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      },
+      {
+        "file": "mobile_cotacao_auto_01.png",
+        "route": "/cotacoes/1",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 0,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      },
+      {
+        "file": "mobile_cotacao_auto_02.png",
+        "route": "/cotacoes/1",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 529,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      },
+      {
+        "file": "mobile_cotacao_auto_03.png",
+        "route": "/cotacoes/1",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 1059,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      },
+      {
+        "file": "mobile_cotacao_auto_04.png",
+        "route": "/cotacoes/1",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 1588,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      },
+      {
+        "file": "mobile_cotacao_residencial_01.png",
+        "route": "/cotacoes/2",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 0,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      },
+      {
+        "file": "mobile_cotacao_residencial_02.png",
+        "route": "/cotacoes/2",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 506,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      },
+      {
+        "file": "mobile_cotacao_residencial_03.png",
+        "route": "/cotacoes/2",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 1012,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      },
+      {
+        "file": "mobile_cotacao_residencial_04.png",
+        "route": "/cotacoes/2",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 1518,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      },
+      {
+        "file": "mobile_cotacao_cartao_01.png",
+        "route": "/cotacoes/3",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 0,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      },
+      {
+        "file": "mobile_cotacao_cartao_02.png",
+        "route": "/cotacoes/3",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 654,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      },
+      {
+        "file": "mobile_lista_usuarios_01.png",
+        "route": "/usuarios",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 0,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      },
+      {
+        "file": "mobile_cadastro_usuario_01.png",
+        "route": "/usuarios/novo",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 0,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      },
+      {
+        "file": "mobile_tema_escuro_01.png",
+        "route": "/painel",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scrollTop": 0,
+        "device": "mobile",
+        "source": "Aplicativo do repositório, commit b3a12b3; execução local; dados fictícios"
+      }
+    ],
+    "api_checks": [
+      {
+        "method": "GET",
+        "route": "/health/db",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1/auth/login",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "route": "/v1/roles",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "route": "/v1/users",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "route": "/v1/insureds",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "route": "/v1/quotations",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "route": "/v1/quotations",
+        "status": 200
+      }
+    ],
+    "fonts": {
+      "icons": true,
+      "roboto": true
+    },
+    "page_errors": []
+  }
+}
