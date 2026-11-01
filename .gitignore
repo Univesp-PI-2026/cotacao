@@ -40,3 +40,8 @@ data/database.sqlite
 Thumbs.db
 .vscode/
 .codex
+
+# =========================
+# Documentos locais do PI II
+# =========================
+/docs/relatorio-pi-ii/
