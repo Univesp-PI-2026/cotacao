@@ -25,11 +25,6 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./components/painel/painel.component').then((m) => m.PainelComponent),
       },
-      {
-        path: 'perfil',
-        loadComponent: () =>
-          import('./components/perfil/perfil.component').then((m) => m.PerfilComponent),
-      },
       // ─── Clientes ────────────────────────────────────────────────────────────
       {
         path: 'clientes',

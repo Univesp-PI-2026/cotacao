@@ -50,7 +50,6 @@ export class ShellComponent implements OnInit {
     { rotulo: 'Clientes', rota: '/clientes', icone: 'people' },
     { rotulo: 'Cotações', rota: '/cotacoes', icone: 'description' },
     { rotulo: 'Usuários', rota: '/usuarios', icone: 'manage_accounts' },
-    { rotulo: 'Perfil', rota: '/perfil', icone: 'account_circle' },
   ];
 
   constructor(

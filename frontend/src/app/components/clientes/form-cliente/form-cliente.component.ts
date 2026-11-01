@@ -73,6 +73,15 @@ export class FormClienteComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
+    // Mantém CPF e RNM sincronizados com a nacionalidade, inclusive durante
+    // o carregamento de um cliente existente.
+    this.formulario.get('estrangeiro')?.valueChanges.subscribe((estrangeiro) => {
+      this.atualizarValidacoesCpfRnm(
+        estrangeiro === true || estrangeiro === 'true'
+      );
+    });
+    this.atualizarValidacoesCpfRnm(this.estrangeiro);
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id && id !== 'novo') {
       this.editando = true;
@@ -82,12 +91,6 @@ export class FormClienteComponent implements OnInit {
         this.formulario.patchValue(cliente);
       }
     }
-
-    // Atualiza validações quando estrangeiro muda
-    this.formulario.get('estrangeiro')?.valueChanges.subscribe((estrangeiro) => {
-      this.atualizarValidacoesCpfRnm(estrangeiro);
-    });
-    this.atualizarValidacoesCpfRnm(false);
   }
 
   atualizarValidacoesCpfRnm(estrangeiro: boolean): void {
@@ -132,6 +135,10 @@ export class FormClienteComponent implements OnInit {
   async salvar(): Promise<void> {
     if (this.formulario.invalid) {
       this.formulario.markAllAsTouched();
+      this.snackBar.open('Revise os campos obrigatórios destacados antes de salvar.', 'Fechar', {
+        duration: 5000,
+        panelClass: 'snack-erro',
+      });
       return;
     }
     this.carregando = true;
