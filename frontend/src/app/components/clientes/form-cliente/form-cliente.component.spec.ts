@@ -14,7 +14,7 @@ describe('FormClienteComponent: validação e cadastro', () => {
   let snackBar: jasmine.SpyObj<MatSnackBar>;
 
   beforeEach(async () => {
-    clientes = jasmine.createSpyObj<ClienteService>('ClienteService', ['criar', 'atualizar']);
+    clientes = jasmine.createSpyObj<ClienteService>('ClienteService', ['buscarPorId', 'criar', 'atualizar']);
     router = jasmine.createSpyObj<Router>('Router', ['navigate']);
     snackBar = jasmine.createSpyObj<MatSnackBar>('MatSnackBar', ['open']);
     TestBed.configureTestingModule({
@@ -64,6 +64,44 @@ describe('FormClienteComponent: validação e cadastro', () => {
   it('aceita e-mails com subdomínio e sinal de mais', () => {
     component.formulario.patchValue({ email: 'cliente+seguro@contato.example.com.br' });
     expect(component.formulario.get('email')!.valid).toBeTrue();
+  });
+
+  it('carrega cliente estrangeiro com RNM sem exigir CPF oculto e permite salvar', async () => {
+    const estrangeiro = {
+      id: 1,
+      nome: 'Cliente estrangeiro',
+      email: 'estrangeiro@example.test',
+      estrangeiro: true,
+      rnm: 'RNM12345',
+      dataNascimento: '1990-05-10',
+      cep: '01310100',
+      logradouro: 'Avenida Paulista',
+      numero: '100',
+      bairro: 'Bela Vista',
+      cidade: 'São Paulo',
+      estado: 'SP',
+      ativo: true,
+    };
+    clientes.buscarPorId.and.resolveTo(estrangeiro);
+    clientes.atualizar.and.resolveTo(estrangeiro);
+    const rotaEdicao = {
+      snapshot: { paramMap: convertToParamMap({ id: '1' }) },
+    } as ActivatedRoute;
+    const editComponent = new FormClienteComponent(
+      TestBed.inject(FormBuilder), clientes, TestBed.inject(CepService),
+      router, rotaEdicao, snackBar
+    );
+
+    await editComponent.ngOnInit();
+
+    expect(editComponent.formulario.get('cpf')?.hasError('required')).toBeFalse();
+    expect(editComponent.formulario.get('rnm')?.valid).toBeTrue();
+    expect(editComponent.formulario.valid).toBeTrue();
+
+    await editComponent.salvar();
+
+    expect(clientes.atualizar).toHaveBeenCalledWith(1, editComponent.formulario.value);
+    expect(router.navigate).toHaveBeenCalledWith(['/clientes']);
   });
 
   it('mostra os erros de validação retornados pela API', async () => {
